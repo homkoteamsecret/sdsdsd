@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>...</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+    cursor: default;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(255,255,255,0.015);
+    pointer-events: none;
+    animation: flicker 5s infinite;
+    z-index: 1;
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 0; }
+    48% { opacity: 0; }
+    50% { opacity: 1; }
+    52% { opacity: 0; }
+    88% { opacity: 0; }
+    89% { opacity: 1; }
+    90% { opacity: 0; }
+    91% { opacity: 1; }
+    92% { opacity: 0; }
+  }
+
+  #vignette {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.95) 100%);
+  }
+
+  #scanlines {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 3;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(255,255,255,0.03) 3px,
+      rgba(255,255,255,0.03) 4px
+    );
+  }
+
+  #flicker {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(255,255,255,0.01);
+    pointer-events: none;
+    z-index: 4;
+    animation: flicker 5s infinite;
+  }
+
+  #container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+
+  #man {
+    width: 250px;
+    height: auto;
+    image-rendering: pixelated;
+    opacity: 0.9;
+    cursor: pointer;
+    transition: transform 0.2s;
+    user-select: none;
+  }
+
+  #man:hover {
+    transform: scale(1.05);
+  }
+
+  #dialog {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s;
+  }
+
+  #dialog.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  #dialog-text {
+    color: #fff;
+    font-size: 24px;
+    letter-spacing: 3px;
+    margin-bottom: 40px;
+    text-align: center;
+    line-height: 2;
+    padding: 0 40px;
+    max-width: 800px;
+  }
+
+  #dialog-text.pink { color: #ff6b9d; }
+  #dialog-text.gray { color: #666; }
+  #dialog-text.white { color: #fff; }
+
+  .dialog-btn {
+    background: transparent;
+    border: 1px solid #333;
+    color: #888;
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    padding: 12px 40px;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 3px;
+    margin: 10px;
+    min-width: 200px;
+  }
+
+  .dialog-btn:hover {
+    color: #ff6b9d;
+    border-color: #ff6b9d;
+  }
+
+  #hint {
+    color: #ff6b9d;
+    font-size: 16px;
+    letter-spacing: 2px;
+    margin-top: 20px;
+    text-align: center;
+    padding: 0 40px;
+    max-width: 800px;
+    display: none;
+  }
+
+  #hint.visible {
+    display: block;
+  }
+
+  #hint-code {
+    color: #fff;
+    font-size: 18px;
+    letter-spacing: 3px;
+    margin-top: 15px;
+    margin-bottom: 30px;
+    font-weight: bold;
+    word-break: break-all;
+    white-space: pre-wrap;
+    display: block;
+  }
+
+  #audio-control {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    color: #222;
+    font-size: 11px;
+    cursor: pointer;
+    z-index: 100;
+    transition: color 0.3s;
+    user-select: none;
+    font-family: 'Courier New', monospace;
+  }
+
+  #audio-control:hover { color: #666; }
+  #audio-control.on { color: #ff6b9d; }
+</style>
+</head>
+<body>
+
+<div id="vignette"></div>
+<div id="scanlines"></div>
+<div id="flicker"></div>
+
+<div id="container">
+  <img id="man" src="man.gif" alt="">
+</div>
+
+<div id="dialog">
+  <div id="dialog-text"></div>
+  <div id="dialog-buttons"></div>
+  <div id="hint">
+    <div id="hint-code"></div>
+  </div>
+</div>
+
+<div id="audio-control">♪ выкл</div>
+
+<audio id="bgMusic" loop>
+  <source src="man.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+  let audioEnabled = false;
+  let audioUnlocked = false;
+  let inDialog = false;
+
+  const music = document.getElementById('bgMusic');
+  const audioControl = document.getElementById('audio-control');
+  const man = document.getElementById('man');
+  const dialog = document.getElementById('dialog');
+  const dialogText = document.getElementById('dialog-text');
+  const dialogButtons = document.getElementById('dialog-buttons');
+  const hintCode = document.getElementById('hint-code');
+  const hint = document.getElementById('hint');
+
+  music.volume = 0;
+
+  function getClickCount() {
+    return parseInt(localStorage.getItem('man_clicks') || '0');
+  }
+
+  function incrementClickCount() {
+    const count = getClickCount() + 1;
+    localStorage.setItem('man_clicks', count);
+    return count;
+  }
+
+  function showDialog(text, className = '') {
+    dialogText.className = className;
+    dialogText.textContent = text;
+    dialogButtons.innerHTML = '';
+    hint.classList.remove('visible');
+    hintCode.textContent = '';
+    
+    // Создаем кнопку закрытия для обычных окон
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'dialog-btn';
+    closeBtn.textContent = 'назад';
+    closeBtn.onclick = () => {
+      dialog.classList.remove('active');
+      inDialog = false;
+    };
+    dialogButtons.appendChild(closeBtn);
+
+    dialog.classList.add('active');
+    inDialog = true;
+  }
+
+  function showTakeButtons() {
+    dialogText.className = '';
+    dialogText.textContent = 'взять?';
+    dialogButtons.innerHTML = '';
+    hint.classList.remove('visible');
+    hintCode.textContent = '';
+
+    const yesBtn = document.createElement('button');
+    yesBtn.className = 'dialog-btn';
+    yesBtn.textContent = 'да';
+    yesBtn.onclick = () => {
+      dialogButtons.innerHTML = '';
+      dialogText.textContent = '';
+      hint.classList.add('visible');
+      hintCode.textContent = '|?}_4vuJ5vh>5v9=4vuK4b5G4>"e|stI|sxH|;*l';
+      
+      // Добавляем кнопку выхода после получения кода
+      const exitBtn = document.createElement('button');
+      exitBtn.className = 'dialog-btn';
+      exitBtn.textContent = 'закрыть';
+      exitBtn.onclick = () => {
+        dialog.classList.remove('active');
+        inDialog = false;
+      };
+      dialogButtons.appendChild(exitBtn);
+    };
+
+    const noBtn = document.createElement('button');
+    noBtn.className = 'dialog-btn';
+    noBtn.textContent = 'нет';
+    noBtn.onclick = () => {
+      dialog.classList.remove('active');
+      inDialog = false;
+    };
+
+    dialogButtons.appendChild(yesBtn);
+    dialogButtons.appendChild(noBtn);
+    dialog.classList.add('active');
+    inDialog = true;
+  }
+
+  man.addEventListener('click', () => {
+    if (inDialog) return;
+    
+    const clicks = incrementClickCount();
+
+    if (clicks === 1) {
+      showDialog('Remember 1 october 2026 is coming', 'white');
+    } else if (clicks === 2) {
+      showTakeButtons();
+    } else if (clicks >= 3) {
+      showDialog('его здесь нет', 'gray');
+    }
+  });
+
+  function tryAutoPlay() {
+    music.volume = 0;
+    const p = music.play();
+    if (p !== undefined) {
+      p.then(() => {
+        audioEnabled = true;
+        audioUnlocked = true;
+        audioControl.classList.add('on');
+        audioControl.textContent = '♪ вкл';
+        fadeIn();
+      }).catch(() => { audioEnabled = false; });
+    }
+  }
+
+  function fadeIn() {
+    let vol = 0;
+    const fade = setInterval(() => {
+      vol += 0.02;
+      if (vol >= 0.5) { vol = 0.5; clearInterval(fade); }
+      music.volume = vol;
+    }, 100);
+  }
+
+  function unlockAudio() {
+    if (audioUnlocked) return;
+    const p = music.play();
+    if (p !== undefined) {
+      p.then(() => {
+        audioUnlocked = true;
+        audioEnabled = true;
+        audioControl.classList.add('on');
+        audioControl.textContent = '♪ вкл';
+        fadeIn();
+        removeUnlockListeners();
+      }).catch(() => {});
+    }
+  }
+
+  function removeUnlockListeners() {
+    window.removeEventListener('mousemove', unlockAudio);
+    window.removeEventListener('click', unlockAudio);
+    window.removeEventListener('keydown', unlockAudio);
+    window.removeEventListener('touchstart', unlockAudio);
+    window.removeEventListener('scroll', unlockAudio);
+  }
+
+  window.addEventListener('mousemove', unlockAudio);
+  window.addEventListener('click', unlockAudio);
+  window.addEventListener('keydown', unlockAudio);
+  window.addEventListener('touchstart', unlockAudio);
+  window.addEventListener('scroll', unlockAudio);
+
+  tryAutoPlay();
+
+  audioControl.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (audioEnabled) {
+      music.pause();
+      audioEnabled = false;
+      audioControl.classList.remove('on');
+      audioControl.textContent = '♪ выкл';
+    } else {
+      music.play().then(() => {
+        audioEnabled = true;
+        audioControl.classList.add('on');
+        audioControl.textContent = '♪ вкл';
+      }).catch(() => {});
+    }
+  });
+</script>
+
+</body>
+</html>

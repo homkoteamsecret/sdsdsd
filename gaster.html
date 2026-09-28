@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>...</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+    cursor: default;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(255,255,255,0.015);
+    pointer-events: none;
+    animation: flicker 5s infinite;
+    z-index: 1;
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 0; }
+    48% { opacity: 0; }
+    50% { opacity: 1; }
+    52% { opacity: 0; }
+    88% { opacity: 0; }
+    89% { opacity: 1; }
+    90% { opacity: 0; }
+    91% { opacity: 1; }
+    92% { opacity: 0; }
+  }
+
+  #vignette {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.95) 100%);
+  }
+
+  #scanlines {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 3;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(255,255,255,0.03) 3px,
+      rgba(255,255,255,0.03) 4px
+    );
+  }
+
+  #container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  #gaster-img {
+    width: 300px;
+    height: auto;
+    image-rendering: pixelated;
+    opacity: 0.9;
+    animation: breathe 6s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.02); opacity: 1; }
+  }
+
+  #audio-control {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    color: #222;
+    font-size: 11px;
+    cursor: pointer;
+    z-index: 100;
+    transition: color 0.3s;
+    user-select: none;
+    font-family: 'Courier New', monospace;
+  }
+
+  #audio-control:hover { color: #666; }
+  #audio-control.on { color: #ff6b9d; }
+</style>
+</head>
+<body>
+
+<div id="vignette"></div>
+<div id="scanlines"></div>
+
+<div id="container">
+  <img id="gaster-img" src="gaster.png" alt="">
+</div>
+
+<div id="audio-control">♪ выкл</div>
+
+<audio id="bgMusic" loop>
+  <source src="gaster.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+  let audioEnabled = false;
+  let audioUnlocked = false;
+
+  const music = document.getElementById('bgMusic');
+  const audioControl = document.getElementById('audio-control');
+
+  music.volume = 0;
+
+  function tryAutoPlay() {
+    music.volume = 0;
+    const p = music.play();
+    if (p !== undefined) {
+      p.then(() => {
+        audioEnabled = true;
+        audioUnlocked = true;
+        audioControl.classList.add('on');
+        audioControl.textContent = '♪ вкл';
+        fadeIn();
+      }).catch(() => { audioEnabled = false; });
+    }
+  }
+
+  function fadeIn() {
+    let vol = 0;
+    const fade = setInterval(() => {
+      vol += 0.02;
+      if (vol >= 0.5) { vol = 0.5; clearInterval(fade); }
+      music.volume = vol;
+    }, 100);
+  }
+
+  function unlockAudio() {
+    if (audioUnlocked) return;
+    const p = music.play();
+    if (p !== undefined) {
+      p.then(() => {
+        audioUnlocked = true;
+        audioEnabled = true;
+        audioControl.classList.add('on');
+        audioControl.textContent = '♪ вкл';
+        fadeIn();
+        window.removeEventListener('mousemove', unlockAudio);
+        window.removeEventListener('click', unlockAudio);
+        window.removeEventListener('keydown', unlockAudio);
+        window.removeEventListener('touchstart', unlockAudio);
+        window.removeEventListener('scroll', unlockAudio);
+      }).catch(() => {});
+    }
+  }
+
+  window.addEventListener('mousemove', unlockAudio);
+  window.addEventListener('click', unlockAudio);
+  window.addEventListener('keydown', unlockAudio);
+  window.addEventListener('touchstart', unlockAudio);
+  window.addEventListener('scroll', unlockAudio);
+
+  tryAutoPlay();
+
+  audioControl.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (audioEnabled) {
+      music.pause();
+      audioEnabled = false;
+      audioControl.classList.remove('on');
+      audioControl.textContent = '♪ выкл';
+    } else {
+      music.play().then(() => {
+        audioEnabled = true;
+        audioControl.classList.add('on');
+        audioControl.textContent = '♪ вкл';
+      }).catch(() => {});
+    }
+  });
+</script>
+
+</body>
+</html>

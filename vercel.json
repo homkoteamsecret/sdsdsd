@@ -1,0 +1,37 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/f", "destination": "/f.html" },
+    { "source": "/gaster", "destination": "/gaster.html" },
+    { "source": "/depths", "destination": "/depths.html" },
+    { "source": "/man", "destination": "/man.html" },
+    { "source": "/terminal", "destination": "/terminal.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*).mp3",
+      "headers": [
+        { "key": "Content-Type", "value": "audio/mpeg" }
+      ]
+    },
+    {
+      "source": "/(.*).png",
+      "headers": [
+        { "key": "Content-Type", "value": "image/png" }
+      ]
+    },
+    {
+      "source": "/(.*).gif",
+      "headers": [
+        { "key": "Content-Type", "value": "image/gif" }
+      ]
+    },
+    {
+      "source": "/(.*).mp4",
+      "headers": [
+        { "key": "Content-Type", "value": "video/mp4" }
+      ]
+    }
+  ]
+}
