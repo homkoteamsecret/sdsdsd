@@ -1,0 +1,45 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/me", "destination": "/me.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*).mp3",
+      "headers": [
+        { "key": "Content-Type", "value": "audio/mpeg" }
+      ]
+    },
+    {
+      "source": "/(.*).png",
+      "headers": [
+        { "key": "Content-Type", "value": "image/png" }
+      ]
+    },
+    {
+      "source": "/(.*).gif",
+      "headers": [
+        { "key": "Content-Type", "value": "image/gif" }
+      ]
+    },
+    {
+      "source": "/(.*).jpe",
+      "headers": [
+        { "key": "Content-Type", "value": "image/jpeg" }
+      ]
+    },
+    {
+      "source": "/(.*).jpeg",
+      "headers": [
+        { "key": "Content-Type", "value": "image/jpeg" }
+      ]
+    },
+    {
+      "source": "/(.*).jpg",
+      "headers": [
+        { "key": "Content-Type", "value": "image/jpeg" }
+      ]
+    }
+  ]
+}
