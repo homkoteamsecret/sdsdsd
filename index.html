@@ -121,62 +121,14 @@
     color: #fff;
     font-size: 24px;
     letter-spacing: 3px;
-    margin-bottom: 50px;
     text-align: center;
     line-height: 2;
     padding: 0 40px;
     max-width: 800px;
   }
 
-  #dialog-text.pink { color: #ff6b9d; }
   #dialog-text.gray { color: #666; }
   #dialog-text.white { color: #fff; }
-
-  .hidden-letter {
-    position: fixed;
-    font-size: 32px;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    z-index: 100;
-    color: transparent;
-    opacity: 0;
-    cursor: default;
-    user-select: none;
-    padding: 15px;
-    transition: opacity 0.3s ease, color 0.3s ease;
-  }
-
-  .hidden-letter:hover,
-  .hidden-letter.revealed {
-    color: #ff6b9d;
-    opacity: 1;
-  }
-
-  #r1 { top: 12%; left: 10%; }
-  #e1 { top: 18%; right: 12%; }
-  #m1 { top: 38%; left: 15%; }
-  #e2 { top: 50%; right: 18%; }
-  #m2 { top: 62%; left: 12%; }
-  #b1 { bottom: 28%; right: 15%; }
-  #e3 { bottom: 18%; left: 20%; }
-  #r2 { bottom: 10%; right: 10%; }
-
-  @media (max-width: 600px) {
-    .hidden-letter {
-      font-size: 28px;
-      padding: 20px;
-    }
-    #r1 { top: 5%; left: 15%; }
-    #e1 { top: 12%; right: 15%; }
-    #m1 { top: 22%; left: 20%; }
-    #e2 { top: 32%; right: 20%; }
-    #m2 { bottom: 32%; left: 20%; }
-    #b1 { bottom: 22%; right: 20%; }
-    #e3 { bottom: 12%; left: 15%; }
-    #r2 { bottom: 5%; right: 15%; }
-
-    #man { width: 180px; }
-  }
 
   #audio-control {
     position: fixed;
@@ -201,15 +153,6 @@
 <div id="scanlines"></div>
 <div id="flicker"></div>
 
-<div class="hidden-letter" id="r1">r</div>
-<div class="hidden-letter" id="e1">e</div>
-<div class="hidden-letter" id="m1">m</div>
-<div class="hidden-letter" id="e2">e</div>
-<div class="hidden-letter" id="m2">m</div>
-<div class="hidden-letter" id="b1">b</div>
-<div class="hidden-letter" id="e3">e</div>
-<div class="hidden-letter" id="r2">r</div>
-
 <div id="container">
   <img id="man" src="man.gif" alt="">
 </div>
@@ -228,7 +171,6 @@
   let audioEnabled = false;
   let audioUnlocked = false;
   let inDialog = false;
-  let clickCount = 0;
 
   const music = document.getElementById('bgMusic');
   const audioControl = document.getElementById('audio-control');
@@ -236,35 +178,21 @@
   const dialog = document.getElementById('dialog');
   const dialogText = document.getElementById('dialog-text');
 
-  document.querySelectorAll('.hidden-letter').forEach(letter => {
-    letter.addEventListener('touchstart', function() {
-      this.classList.add('revealed');
-    });
-    letter.addEventListener('click', function() {
-      this.classList.add('revealed');
-    });
-  });
-
   music.volume = 0;
 
   man.addEventListener('click', () => {
     if (inDialog) return;
     inDialog = true;
-    clickCount++;
 
-    dialogText.className = 'gray';
-
-    if (clickCount === 1) {
-      dialogText.textContent = 'ещё не время';
-    } else {
-      dialogText.textContent = 'скоро';
-    }
+    dialogText.className = 'white';
+    dialogText.textContent = 'Его здесь нет, не забудь';
 
     dialog.classList.add('active');
+
     setTimeout(() => {
       dialog.classList.remove('active');
       inDialog = false;
-    }, 2500);
+    }, 4000);
   });
 
   function tryAutoPlay() {
@@ -277,9 +205,7 @@
         audioControl.classList.add('on');
         audioControl.textContent = '♪ вкл';
         fadeIn();
-      }).catch(() => {
-        audioEnabled = false;
-      });
+      }).catch(() => { audioEnabled = false; });
     }
   }
 
@@ -287,10 +213,7 @@
     let vol = 0;
     const fade = setInterval(() => {
       vol += 0.02;
-      if (vol >= 0.5) {
-        vol = 0.5;
-        clearInterval(fade);
-      }
+      if (vol >= 0.5) { vol = 0.5; clearInterval(fade); }
       music.volume = vol;
     }, 100);
   }
