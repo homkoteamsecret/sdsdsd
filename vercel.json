@@ -2,6 +2,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
+    { "source": "/666", "destination": "/666.html" },
     { "source": "/gaster", "destination": "/666.html" },
     { "source": "/f", "destination": "/f.html" },
     { "source": "/terminal", "destination": "/terminal.html" },
