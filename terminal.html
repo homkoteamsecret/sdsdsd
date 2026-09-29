@@ -410,6 +410,16 @@
     '5.txt': 'я не вижу себя в зеркале.'
   };
 
+  const secretFiles = {
+    '.hidden': 'ты нашёл это.',
+    'shadow.txt': 'я вижу тебя.',
+    'void.txt': 'здесь ничего нет.',
+    'mirror.txt': 'ты не видишь себя.',
+    'gaster.txt': '☝︎✌︎💧︎❄︎☜︎☼︎',
+    '1225.txt': '25 декабря.',
+    'secret.txt': 'пароль: 230.18.70.115'
+  };
+
   const commands = {
     help: () => {
       return `доступные команды:
@@ -431,6 +441,8 @@
       const file = args[0];
       if (!file) return 'укажи файл: cat <файл>';
 
+      if (secretFiles[file]) return secretFiles[file];
+
       if (!connected && lockedFiles[file]) {
         return `файл "${file}" недоступен. требуется подключение к серверу.`;
       }
@@ -438,20 +450,69 @@
       if (allFiles[file]) return allFiles[file];
       return `файл "${file}" не найден.`;
     },
-    whoami: () => {
-      return 'dess';
+    whoami: () => 'dess',
+    date: () => new Date().toISOString().split('T')[0],
+    soon: () => 'это не файл. это обещание.',
+    remember: () => 'я помню тебя.',
+    depths: () => 'ты уже здесь.',
+    gaster: () => 'он был первым. он будет последним.',
+    noelle: () => 'она ждёт. скажи ей, что я в порядке.',
+    kris: () => 'ты не ты.',
+    dess: () => 'это я.',
+    void: () => 'пустота — это не место. это ты.',
+    friend: () => 'он смотрит.',
+    mirror: () => 'ты не видишь себя.',
+    water: () => 'чёрная вода. она везде.',
+    snow: () => 'снег. я помню снег.',
+    helpme: () => 'помоги мне.',
+    secret: () => 'ты нашёл это.',
+    "1225": () => '25 декабря.',
+    hello: () => 'привет.',
+    hi: () => '...',
+    bye: () => 'не уходи.',
+    love: () => '...',
+    hate: () => 'я не ненавижу тебя.',
+    fear: () => 'я боюсь.',
+    alone: () => 'я одна.',
+    lost: () => 'я потерялась.',
+    found: () => 'ты нашёл меня.',
+    death: () => 'меня нет.',
+    life: () => 'я жива.',
+    god: () => 'его нет.',
+    devil: () => 'он здесь.',
+    angel: () => 'я не ангел.',
+    demon: () => 'я не демон.',
+    monster: () => 'я не монстр.',
+    sudo: () => 'доступ запрещён.',
+    admin: () => 'ты не админ.',
+    root: () => 'root недоступен.',
+    hack: () => 'взлом... ошибка.',
+    unlock: () => 'что разблокировать?',
+    decode: (args) => {
+      const b64 = args.join(' ');
+      if (!b64) return 'укажи base64: decode <base64>';
+      try {
+        return atob(b64);
+      } catch (e) {
+        return 'неверный base64.';
+      }
     },
-    soon: () => {
-      return 'это не файл. это обещание.';
+    encode: (args) => {
+      const text = args.join(' ');
+      if (!text) return 'укажи текст: encode <текст>';
+      return btoa(text);
+    },
+    md5: (args) => {
+      const text = args.join(' ');
+      if (!text) return 'укажи текст: md5 <текст>';
+      return md5(text);
     },
     connect: (args) => {
       if (connected) return 'уже подключён.';
 
       const ip = args[0];
 
-      if (!ip) {
-        return 'синтаксис: connect <ip>';
-      }
+      if (!ip) return 'синтаксис: connect <ip>';
 
       const computed = md5(ip);
 
