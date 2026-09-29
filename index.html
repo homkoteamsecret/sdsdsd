@@ -152,6 +152,10 @@
       }).catch(() => { audioEnabled = false; });
     }
   }
+<!-- 
+  я найду выход. 
+  я вернусь 
+-->
 
   function fadeIn() {
     let vol = 0;
@@ -161,6 +165,10 @@
       music.volume = vol;
     }, 100);
   }
+<!-- 
+  я найду выход. 
+  я вернусь 
+-->
 
   function unlockAudio() {
     if (audioUnlocked) return;
@@ -180,14 +188,26 @@
       }).catch(() => {});
     }
   }
+<!-- 
+  я найду выход. 
+  я вернусь 
+-->
 
   window.addEventListener('mousemove', unlockAudio);
   window.addEventListener('click', unlockAudio);
   window.addEventListener('keydown', unlockAudio);
   window.addEventListener('touchstart', unlockAudio);
   window.addEventListener('scroll', unlockAudio);
+<!-- 
+  я найду выход. 
+  я вернусь 
+-->
 
   tryAutoPlay();
+<!-- 
+  я найду выход. 
+  я вернусь 
+-->
 
   audioControl.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -205,6 +225,10 @@
     }
   });
 </script>
+<!-- 
+  я найду выход. 
+  я вернусь 
+-->
 
 </body>
 </html>
