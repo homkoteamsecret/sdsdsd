@@ -218,7 +218,6 @@
 </audio>
 
 <script>
-  // ===== MD5 РЕАЛИЗАЦИЯ =====
   function md5(str) {
     function rotateLeft(lValue, iShiftBits) {
       return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
@@ -307,7 +306,7 @@
       }
       return utftext;
     }
-    
+
     var x = Array();
     var k, AA, BB, CC, DD, a, b, c, d;
     var S11 = 7, S12 = 12, S13 = 17, S14 = 22;
@@ -392,11 +391,10 @@
     return temp.toLowerCase();
   }
 
-  // ===== НАСТРОЙКИ =====
   const LOGIN = 'undraeel';
   const PASSWORD_MD5 = '0ca54919a973df6844b6c097fcd840cc';
+  const TERMINAL_TOKEN = 'a8f5f167f44f4964e6c998dee827110c';
 
-  // ===== ЭЛЕМЕНТЫ =====
   const loginInput = document.getElementById('login');
   const passwordInput = document.getElementById('password');
   const submit = document.getElementById('submit');
@@ -409,22 +407,21 @@
 
   music.volume = 0;
 
-  // ===== ПРОВЕРКА =====
   submit.addEventListener('click', () => {
     const loginValue = loginInput.value.trim();
     const passwordValue = passwordInput.value;
-    
+
     if (loginValue === LOGIN && md5(passwordValue) === PASSWORD_MD5) {
       response.className = 'visible success';
       response.textContent = 'доступ разрешён...';
-      
+
       setTimeout(() => {
-        window.location.href = '/terminal';
+        window.location.href = '/terminal?token=' + TERMINAL_TOKEN;
       }, 1500);
     } else {
       response.className = 'visible error';
       response.textContent = 'доступ запрещён.';
-      
+
       setTimeout(() => {
         response.classList.remove('visible');
       }, 3000);
@@ -435,7 +432,6 @@
     if (e.key === 'Enter') submit.click();
   });
 
-  // ===== АУДИО =====
   function tryAutoPlay() {
     music.volume = 0;
     const p = music.play();

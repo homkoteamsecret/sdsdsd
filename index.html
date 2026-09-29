@@ -90,6 +90,7 @@
     cursor: pointer;
     transition: transform 0.2s;
     user-select: none;
+    -webkit-user-drag: none;
   }
 
   #man:hover {
@@ -120,7 +121,7 @@
     color: #fff;
     font-size: 24px;
     letter-spacing: 3px;
-    margin-bottom: 40px;
+    margin-bottom: 50px;
     text-align: center;
     line-height: 2;
     padding: 0 40px;
@@ -131,50 +132,50 @@
   #dialog-text.gray { color: #666; }
   #dialog-text.white { color: #fff; }
 
-  .dialog-btn {
-    background: transparent;
-    border: 1px solid #333;
-    color: #888;
+  .hidden-letter {
+    position: fixed;
+    font-size: 32px;
     font-family: 'Courier New', monospace;
-    font-size: 18px;
-    padding: 12px 40px;
-    cursor: pointer;
-    transition: all 0.3s;
-    letter-spacing: 3px;
-    margin: 10px;
-    min-width: 200px;
-  }
-
-  .dialog-btn:hover {
-    color: #ff6b9d;
-    border-color: #ff6b9d;
-  }
-
-  #hint {
-    color: #ff6b9d;
-    font-size: 16px;
-    letter-spacing: 2px;
-    margin-top: 20px;
-    text-align: center;
-    padding: 0 40px;
-    max-width: 800px;
-    display: none;
-  }
-
-  #hint.visible {
-    display: block;
-  }
-
-  #hint-code {
-    color: #fff;
-    font-size: 18px;
-    letter-spacing: 3px;
-    margin-top: 15px;
-    margin-bottom: 30px;
     font-weight: bold;
-    word-break: break-all;
-    white-space: pre-wrap;
-    display: block;
+    z-index: 100;
+    color: transparent;
+    opacity: 0;
+    cursor: default;
+    user-select: none;
+    padding: 15px;
+    transition: opacity 0.3s ease, color 0.3s ease;
+  }
+
+  .hidden-letter:hover,
+  .hidden-letter.revealed {
+    color: #ff6b9d;
+    opacity: 1;
+  }
+
+  #r1 { top: 12%; left: 10%; }
+  #e1 { top: 18%; right: 12%; }
+  #m1 { top: 38%; left: 15%; }
+  #e2 { top: 50%; right: 18%; }
+  #m2 { top: 62%; left: 12%; }
+  #b1 { bottom: 28%; right: 15%; }
+  #e3 { bottom: 18%; left: 20%; }
+  #r2 { bottom: 10%; right: 10%; }
+
+  @media (max-width: 600px) {
+    .hidden-letter {
+      font-size: 28px;
+      padding: 20px;
+    }
+    #r1 { top: 5%; left: 15%; }
+    #e1 { top: 12%; right: 15%; }
+    #m1 { top: 22%; left: 20%; }
+    #e2 { top: 32%; right: 20%; }
+    #m2 { bottom: 32%; left: 20%; }
+    #b1 { bottom: 22%; right: 20%; }
+    #e3 { bottom: 12%; left: 15%; }
+    #r2 { bottom: 5%; right: 15%; }
+
+    #man { width: 180px; }
   }
 
   #audio-control {
@@ -200,16 +201,21 @@
 <div id="scanlines"></div>
 <div id="flicker"></div>
 
+<div class="hidden-letter" id="r1">r</div>
+<div class="hidden-letter" id="e1">e</div>
+<div class="hidden-letter" id="m1">m</div>
+<div class="hidden-letter" id="e2">e</div>
+<div class="hidden-letter" id="m2">m</div>
+<div class="hidden-letter" id="b1">b</div>
+<div class="hidden-letter" id="e3">e</div>
+<div class="hidden-letter" id="r2">r</div>
+
 <div id="container">
   <img id="man" src="man.gif" alt="">
 </div>
 
 <div id="dialog">
   <div id="dialog-text"></div>
-  <div id="dialog-buttons"></div>
-  <div id="hint">
-    <div id="hint-code"></div>
-  </div>
 </div>
 
 <div id="audio-control">♪ выкл</div>
@@ -222,102 +228,43 @@
   let audioEnabled = false;
   let audioUnlocked = false;
   let inDialog = false;
+  let clickCount = 0;
 
   const music = document.getElementById('bgMusic');
   const audioControl = document.getElementById('audio-control');
   const man = document.getElementById('man');
   const dialog = document.getElementById('dialog');
   const dialogText = document.getElementById('dialog-text');
-  const dialogButtons = document.getElementById('dialog-buttons');
-  const hintCode = document.getElementById('hint-code');
-  const hint = document.getElementById('hint');
+
+  document.querySelectorAll('.hidden-letter').forEach(letter => {
+    letter.addEventListener('touchstart', function() {
+      this.classList.add('revealed');
+    });
+    letter.addEventListener('click', function() {
+      this.classList.add('revealed');
+    });
+  });
 
   music.volume = 0;
 
-  function getClickCount() {
-    return parseInt(localStorage.getItem('man_clicks') || '0');
-  }
-
-  function incrementClickCount() {
-    const count = getClickCount() + 1;
-    localStorage.setItem('man_clicks', count);
-    return count;
-  }
-
-  function showDialog(text, className = '') {
-    dialogText.className = className;
-    dialogText.textContent = text;
-    dialogButtons.innerHTML = '';
-    hint.classList.remove('visible');
-    hintCode.textContent = '';
-    
-    // Создаем кнопку закрытия для обычных окон
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'dialog-btn';
-    closeBtn.textContent = 'назад';
-    closeBtn.onclick = () => {
-      dialog.classList.remove('active');
-      inDialog = false;
-    };
-    dialogButtons.appendChild(closeBtn);
-
-    dialog.classList.add('active');
-    inDialog = true;
-  }
-
-  function showTakeButtons() {
-    dialogText.className = '';
-    dialogText.textContent = 'взять?';
-    dialogButtons.innerHTML = '';
-    hint.classList.remove('visible');
-    hintCode.textContent = '';
-
-    const yesBtn = document.createElement('button');
-    yesBtn.className = 'dialog-btn';
-    yesBtn.textContent = 'да';
-    yesBtn.onclick = () => {
-      dialogButtons.innerHTML = '';
-      dialogText.textContent = '';
-      hint.classList.add('visible');
-      hintCode.textContent = '|?}_4vuJ5vh>5v9=4vuK4b5G4>"e|stI|sxH|;*l';
-      
-      // Добавляем кнопку выхода после получения кода
-      const exitBtn = document.createElement('button');
-      exitBtn.className = 'dialog-btn';
-      exitBtn.textContent = 'закрыть';
-      exitBtn.onclick = () => {
-        dialog.classList.remove('active');
-        inDialog = false;
-      };
-      dialogButtons.appendChild(exitBtn);
-    };
-
-    const noBtn = document.createElement('button');
-    noBtn.className = 'dialog-btn';
-    noBtn.textContent = 'нет';
-    noBtn.onclick = () => {
-      dialog.classList.remove('active');
-      inDialog = false;
-    };
-
-    dialogButtons.appendChild(yesBtn);
-    dialogButtons.appendChild(noBtn);
-    dialog.classList.add('active');
-    inDialog = true;
-  }
-
   man.addEventListener('click', () => {
     if (inDialog) return;
-    
-    const clicks = incrementClickCount();
+    inDialog = true;
+    clickCount++;
 
-    if (clicks === 1) {
-      showDialog('Remember 1 october 2026 is coming', 'white');
-    } else if (clicks === 2) {
-      showTakeButtons();
-    } else if (clicks >= 3) {
-      showDialog('его здесь нет', 'gray');
+    dialogText.className = 'gray';
+
+    if (clickCount === 1) {
+      dialogText.textContent = 'ещё не время';
+    } else {
+      dialogText.textContent = 'скоро';
     }
+
+    dialog.classList.add('active');
+    setTimeout(() => {
+      dialog.classList.remove('active');
+      inDialog = false;
+    }, 2500);
   });
 
   function tryAutoPlay() {
@@ -330,7 +277,9 @@
         audioControl.classList.add('on');
         audioControl.textContent = '♪ вкл';
         fadeIn();
-      }).catch(() => { audioEnabled = false; });
+      }).catch(() => {
+        audioEnabled = false;
+      });
     }
   }
 
@@ -338,7 +287,10 @@
     let vol = 0;
     const fade = setInterval(() => {
       vol += 0.02;
-      if (vol >= 0.5) { vol = 0.5; clearInterval(fade); }
+      if (vol >= 0.5) {
+        vol = 0.5;
+        clearInterval(fade);
+      }
       music.volume = vol;
     }, 100);
   }
@@ -353,17 +305,13 @@
         audioControl.classList.add('on');
         audioControl.textContent = '♪ вкл';
         fadeIn();
-        removeUnlockListeners();
+        window.removeEventListener('mousemove', unlockAudio);
+        window.removeEventListener('click', unlockAudio);
+        window.removeEventListener('keydown', unlockAudio);
+        window.removeEventListener('touchstart', unlockAudio);
+        window.removeEventListener('scroll', unlockAudio);
       }).catch(() => {});
     }
-  }
-
-  function removeUnlockListeners() {
-    window.removeEventListener('mousemove', unlockAudio);
-    window.removeEventListener('click', unlockAudio);
-    window.removeEventListener('keydown', unlockAudio);
-    window.removeEventListener('touchstart', unlockAudio);
-    window.removeEventListener('scroll', unlockAudio);
   }
 
   window.addEventListener('mousemove', unlockAudio);

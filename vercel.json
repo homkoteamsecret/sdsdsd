@@ -2,11 +2,11 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
+    { "source": "/gaster", "destination": "/666.html" },
     { "source": "/f", "destination": "/f.html" },
-    { "source": "/gaster", "destination": "/gaster.html" },
+    { "source": "/terminal", "destination": "/terminal.html" },
     { "source": "/depths", "destination": "/depths.html" },
-    { "source": "/man", "destination": "/man.html" },
-    { "source": "/terminal", "destination": "/terminal.html" }
+    { "source": "/man", "destination": "/man.html" }
   ],
   "headers": [
     {

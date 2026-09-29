@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>...</title>
@@ -57,8 +57,8 @@
       to bottom,
       transparent 0px,
       transparent 2px,
-      rgba(255,255,255,0.03) 3px,
-      rgba(255,255,255,0.03) 4px
+      rgba(255,255,255,0.02) 3px,
+      rgba(255,255,255,0.02) 4px
     );
   }
 
@@ -69,19 +69,22 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    padding: 40px;
+    text-align: center;
   }
 
-  #gaster-img {
-    width: 300px;
-    height: auto;
-    image-rendering: pixelated;
-    opacity: 0.9;
-    animation: breathe 6s ease-in-out infinite;
+  #text {
+    color: #444;
+    font-size: 18px;
+    letter-spacing: 4px;
+    line-height: 2.2;
+    max-width: 700px;
+    opacity: 0;
+    transition: opacity 4s ease;
   }
 
-  @keyframes breathe {
-    0%, 100% { transform: scale(1); opacity: 0.85; }
-    50% { transform: scale(1.02); opacity: 1; }
+  #text.visible {
+    opacity: 1;
   }
 
   #audio-control {
@@ -107,10 +110,10 @@
 <div id="scanlines"></div>
 
 <div id="container">
-  <img id="gaster-img" src="gaster.png" alt="">
+  <div id="text">The depths are not only a place, they are a state.</div>
 </div>
 
-<div id="audio-control">♪ выкл</div>
+<div id="audio-control">♪ off</div>
 
 <audio id="bgMusic" loop>
   <source src="gaster.mp3" type="audio/mpeg">
@@ -122,8 +125,13 @@
 
   const music = document.getElementById('bgMusic');
   const audioControl = document.getElementById('audio-control');
+  const text = document.getElementById('text');
 
   music.volume = 0;
+
+  setTimeout(() => {
+    text.classList.add('visible');
+  }, 1500);
 
   function tryAutoPlay() {
     music.volume = 0;
@@ -133,7 +141,7 @@
         audioEnabled = true;
         audioUnlocked = true;
         audioControl.classList.add('on');
-        audioControl.textContent = '♪ вкл';
+        audioControl.textContent = '♪ on';
         fadeIn();
       }).catch(() => { audioEnabled = false; });
     }
@@ -143,7 +151,7 @@
     let vol = 0;
     const fade = setInterval(() => {
       vol += 0.02;
-      if (vol >= 0.5) { vol = 0.5; clearInterval(fade); }
+      if (vol >= 0.4) { vol = 0.4; clearInterval(fade); }
       music.volume = vol;
     }, 100);
   }
@@ -156,7 +164,7 @@
         audioUnlocked = true;
         audioEnabled = true;
         audioControl.classList.add('on');
-        audioControl.textContent = '♪ вкл';
+        audioControl.textContent = '♪ on';
         fadeIn();
         window.removeEventListener('mousemove', unlockAudio);
         window.removeEventListener('click', unlockAudio);
@@ -181,12 +189,12 @@
       music.pause();
       audioEnabled = false;
       audioControl.classList.remove('on');
-      audioControl.textContent = '♪ выкл';
+      audioControl.textContent = '♪ off';
     } else {
       music.play().then(() => {
         audioEnabled = true;
         audioControl.classList.add('on');
-        audioControl.textContent = '♪ вкл';
+        audioControl.textContent = '♪ on';
       }).catch(() => {});
     }
   });

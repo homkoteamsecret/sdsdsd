@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>terminal</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+    cursor: text;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(255,255,255,0.015);
+    pointer-events: none;
+    animation: flicker 5s infinite;
+    z-index: 1;
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 0; }
+    48% { opacity: 0; }
+    50% { opacity: 1; }
+    52% { opacity: 0; }
+    88% { opacity: 0; }
+    89% { opacity: 1; }
+    90% { opacity: 0; }
+    91% { opacity: 1; }
+    92% { opacity: 0; }
+  }
+
+  #vignette {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.95) 100%);
+  }
+
+  #scanlines {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 3;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(255,255,255,0.02) 3px,
+      rgba(255,255,255,0.02) 4px
+    );
+  }
+
+  #terminal {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    padding: 30px;
+    overflow-y: auto;
+    color: #ccc;
+    font-size: 15px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  #output {
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  #input-line {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+  }
+
+  #prompt {
+    color: #ff6b9d;
+    margin-right: 10px;
+    user-select: none;
+  }
+
+  #input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    font-size: 15px;
+    flex: 1;
+    caret-color: #ff6b9d;
+  }
+
+  .pink { color: #ff6b9d; }
+  .gray { color: #666; }
+  .red { color: #ff5555; }
+  .green { color: #7fff7f; }
+  .yellow { color: #ffeb3b; }
+  .white { color: #fff; }
+
+  #audio-control {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    color: #222;
+    font-size: 11px;
+    cursor: pointer;
+    z-index: 100;
+    transition: color 0.3s;
+    user-select: none;
+    font-family: 'Courier New', monospace;
+  }
+
+  #audio-control:hover { color: #666; }
+  #audio-control.on { color: #ff6b9d; }
+</style>
+</head>
+<body>
+
+<div id="vignette"></div>
+<div id="scanlines"></div>
+
+<div id="terminal">
+  <div id="output"></div>
+  <div id="input-line" style="display:none;">
+    <span id="prompt">underune@local:~$</span>
+    <input type="text" id="input" autocomplete="off" autofocus spellcheck="false">
+  </div>
+</div>
+
+<div id="audio-control">♪ выкл</div>
+
+<audio id="bgMusic" loop>
+  <source src="gaster.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+  const output = document.getElementById('output');
+  const input = document.getElementById('input');
+  const inputLine = document.getElementById('input-line');
+  const prompt = document.getElementById('prompt');
+  const music = document.getElementById('bgMusic');
+  const audioControl = document.getElementById('audio-control');
+
+  const TERMINAL_TOKEN = 'a8f5f167f44f4964e6c998dee827110c';
+
+  let audioEnabled = false;
+  let audioUnlocked = false;
+  let booted = false;
+
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+
+  function print(text, className = '') {
+    const div = document.createElement('div');
+    if (className) div.className = className;
+    div.textContent = text;
+    output.appendChild(div);
+    scrollBottom();
+  }
+
+  function scrollBottom() {
+    const terminal = document.getElementById('terminal');
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+
+  // ===== ПРОВЕРКА ТОКЕНА =====
+  if (token !== TERMINAL_TOKEN) {
+    print('underune OS', 'pink');
+    print('');
+    print('ACCESS DENIED', 'red');
+    print('требуется авторизация.', 'gray');
+    print('');
+    print('перейди на /f', 'gray');
+    
+    setTimeout(() => {
+      window.location.href = '/f';
+    }, 3000);
+  } else {
+    bootSequence();
+  }
+
+  // ===== ЗАГРУЗКА СИСТЕМЫ =====
+  function bootSequence() {
+    const lines = [
+      { text: 'underune OS', class: 'pink', delay: 0 },
+      { text: '', class: '', delay: 500 },
+      { text: 'Loading...', class: 'gray', delay: 1000 },
+      { text: '', class: '', delay: 1500 },
+      { text: 'Connecting to the server...', class: 'gray', delay: 2000 },
+      { text: '', class: '', delay: 3000 },
+      { text: 'Error', class: 'red', delay: 3500 },
+      { text: 'Server is offline; switching to local mode.', class: 'yellow', delay: 4000 },
+      { text: '', class: '', delay: 4500 },
+      { text: 'local mode enabled.', class: 'green', delay: 5000 },
+      { text: '', class: '', delay: 5500 },
+      { text: 'введи help для списка команд.', class: 'gray', delay: 6000 }
+    ];
+
+    lines.forEach(line => {
+      setTimeout(() => {
+        print(line.text, line.class);
+      }, line.delay);
+    });
+
+    setTimeout(() => {
+      inputLine.style.display = 'flex';
+      input.focus();
+      booted = true;
+    }, 6500);
+  }
+
+  // ===== КОМАНДЫ =====
+  const files = {
+    '1.txt': 'soon'
+  };
+
+  const commands = {
+    help: () => {
+      return `доступные команды:
+  ls         — список файлов
+  cat <файл> — прочитать файл
+  clear      — очистить экран
+  exit       — выход
+  help       — эта справка`;
+    },
+    ls: () => {
+      return Object.keys(files).map(f => `  ${f}`).join('\n');
+    },
+    cat: (args) => {
+      const file = args[0];
+      if (!file) return 'укажи файл: cat <файл>';
+      if (files[file]) return files[file];
+      return `файл "${file}" не найден.`;
+    },
+    clear: () => {
+      output.innerHTML = '';
+      return '';
+    },
+    exit: () => {
+      setTimeout(() => {
+        window.location.href = 'about:blank';
+      }, 1000);
+      return 'выход...';
+    }
+  };
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      if (!booted) return;
+      const line = input.value.trim();
+      if (!line) return;
+
+      print(`${prompt.textContent} ${line}`, 'gray');
+
+      const parts = line.split(' ');
+      const cmd = parts[0].toLowerCase();
+      const args = parts.slice(1);
+
+      if (commands[cmd]) {
+        const result = commands[cmd](args);
+        if (result) print(result);
+      } else {
+        print(`команда "${cmd}" не найдена. введи help`, 'red');
+      }
+
+      input.value = '';
+      scrollBottom();
+    }
+  });
+
+  // ===== АУДИО =====
+  music.volume = 0;
+
+  function tryAutoPlay() {
+    music.volume = 0;
+    const p = music.play();
+    if (p !== undefined) {
+      p.then(() => {
+        audioEnabled = true;
+        audioUnlocked = true;
+        audioControl.classList.add('on');
+        audioControl.textContent = '♪ вкл';
+        fadeIn();
+      }).catch(() => { audioEnabled = false; });
+    }
+  }
+
+  function fadeIn() {
+    let vol = 0;
+    const fade = setInterval(() => {
+      vol += 0.02;
+      if (vol >= 0.3) { vol = 0.3; clearInterval(fade); }
+      music.volume = vol;
+    }, 100);
+  }
+
+  function unlockAudio() {
+    if (audioUnlocked) return;
+    const p = music.play();
+    if (p !== undefined) {
+      p.then(() => {
+        audioUnlocked = true;
+        audioEnabled = true;
+        audioControl.classList.add('on');
+        audioControl.textContent = '♪ вкл';
+        fadeIn();
+        window.removeEventListener('mousemove', unlockAudio);
+        window.removeEventListener('click', unlockAudio);
+        window.removeEventListener('keydown', unlockAudio);
+        window.removeEventListener('touchstart', unlockAudio);
+        window.removeEventListener('scroll', unlockAudio);
+      }).catch(() => {});
+    }
+  }
+
+  window.addEventListener('mousemove', unlockAudio);
+  window.addEventListener('click', unlockAudio);
+  window.addEventListener('keydown', unlockAudio);
+  window.addEventListener('touchstart', unlockAudio);
+  window.addEventListener('scroll', unlockAudio);
+
+  tryAutoPlay();
+
+  audioControl.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (audioEnabled) {
+      music.pause();
+      audioEnabled = false;
+      audioControl.classList.remove('on');
+      audioControl.textContent = '♪ выкл';
+    } else {
+      music.play().then(() => {
+        audioEnabled = true;
+        audioControl.classList.add('on');
+        audioControl.textContent = '♪ вкл';
+      }).catch(() => {});
+    }
+  });
+
+  document.addEventListener('click', () => {
+    if (booted) input.focus();
+  });
+</script>
+
+</body>
+</html>
