@@ -7,7 +7,7 @@
     { "source": "/f", "destination": "/f.html" },
     { "source": "/terminal", "destination": "/terminal.html" },
     { "source": "/depths", "destination": "/depths.html" },
-    { "source": "/man", "destination": "/man.html" }
+    { "source": "/man", "destination": "/man.html" },{ "source": "/piska", "destination": "/piska.html" }
   ],
   "headers": [
     {
