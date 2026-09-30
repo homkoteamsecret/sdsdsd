@@ -3,6 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <title>...</title>
+
+<!--
+  c29vbg==
+  0Y8g0L3QtSDQv9C+0LzQvdGOLCDQutCw0Log0L7QutCw0LfQsNC70LDRgdGMINC30LTQtdGB0YwuINCn0ZHRgNC90LDRjyDQstC+0LTQsC4g0KLQuNGI0LjQvdCwLg==
+  0Y8g0YXQvtC00LjQu9CwINC00L7Qu9Cz0L4uINCy0YHRjiDQttC40LfQvdGMLiDQl9C00LXRgdGMINC90LXRgiDQstGA0LXQvNC10L3QuC4=
+  0Y8g0L3QsNGI0LvQsCDRgtC10YDQvNC40L3QsNC7LiDQvtC9INGA0LDQsdC+0YLQsNC10YIu
+  0Y8g0L3QsNGI0LvQsCDQt9C10YDQutCw0LvQvi4g0LIg0L3QtdC8INC90LjQutC+0LPQviDQvdC10YIu
+  0Y8g0L3QsNGI0LvQsCDQstGL0YXQvtC0LiDQvdC+INC+0L0g0L3QtSDRgNCw0LHQvtGC0LDQtdGCLiDQvdGD0LbQvdCwINC/0L7QvNC+0YnRjC4=
+  dW5kcmFlZWwgdG9qZSB6ZGVzeS4gb24gYnlsIHpkZXMgdnNlZ2RhLg==
+  ZnJpZW5kLiBvbiBzbW90cml0IG5hIG1lbnlhLiBvbiBob2NoZXQgZXN0Lg==
+-->
+
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -80,10 +92,11 @@
     align-items: center;
     min-height: 100vh;
     flex-direction: column;
+    gap: 60px;
   }
 
   #dess {
-    width: 300px;
+    width: 250px;
     height: auto;
     image-rendering: pixelated;
     opacity: 0.9;
@@ -95,6 +108,81 @@
   @keyframes breathe {
     0%, 100% { transform: scale(1); opacity: 0.85; }
     50% { transform: scale(1.02); opacity: 1; }
+  }
+
+  #timer-block {
+    text-align: center;
+  }
+
+  #timer-label {
+    display: block;
+    font-size: 13px;
+    letter-spacing: 10px;
+    color: #555;
+    margin-bottom: 25px;
+    font-family: 'Courier New', monospace;
+  }
+
+  #timer {
+    font-family: 'Courier New', monospace;
+    font-size: 72px;
+    font-weight: bold;
+    letter-spacing: 8px;
+    color: #fff;
+    text-shadow: 
+      0 0 10px #fff,
+      0 0 20px #fff,
+      0 0 40px #ff6b9d,
+      0 0 80px #ff6b9d,
+      0 0 120px #ff6b9d;
+    animation: pulse 2s ease-in-out infinite;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  @keyframes pulse {
+    0%, 100% { 
+      text-shadow: 
+        0 0 10px #fff,
+        0 0 20px #fff,
+        0 0 40px #ff6b9d,
+        0 0 80px #ff6b9d,
+        0 0 120px #ff6b9d;
+    }
+    50% { 
+      text-shadow: 
+        0 0 20px #fff,
+        0 0 40px #fff,
+        0 0 80px #ff6b9d,
+        0 0 160px #ff6b9d,
+        0 0 240px #ff6b9d;
+    }
+  }
+
+  #timer.soon {
+    color: #ff6b9d;
+    text-shadow: 
+      0 0 10px #ff6b9d,
+      0 0 20px #ff6b9d,
+      0 0 40px #ff0044,
+      0 0 80px #ff0044,
+      0 0 120px #ff0044;
+  }
+
+  #timer.open {
+    color: #ff6b9d;
+    font-size: 42px;
+    letter-spacing: 10px;
+    animation: pulse 1s ease-in-out infinite;
+  }
+
+  #timer-sub {
+    display: block;
+    font-size: 14px;
+    letter-spacing: 6px;
+    color: #444;
+    margin-top: 25px;
+    font-family: 'Courier New', monospace;
   }
 
   #audio-control {
@@ -122,6 +210,12 @@
 
 <div id="container">
   <img id="dess" src="dess.png" alt="">
+  
+  <div id="timer-block">
+    <span id="timer-label">SOMETHING WILL HAPPEN IN</span>
+    <div id="timer">00:00:00:00</div>
+    <span id="timer-sub">she can't get out alone</span>
+  </div>
 </div>
 
 <div id="audio-control">♪ выкл</div>
@@ -130,45 +224,103 @@
   <source src="dess.mp3" type="audio/mpeg">
 </audio>
 
+<audio id="timerSound" loop>
+  <source src="timer.mp3" type="audio/mpeg">
+</audio>
+
 <script>
+  const TARGET = new Date('2026-10-01T08:00:00Z').getTime();
+
+  const timerEl = document.getElementById('timer');
+  const timerLabel = document.getElementById('timer-label');
+  const timerSub = document.getElementById('timer-sub');
+
+  function updateTimer() {
+    const now = Date.now();
+    const diff = TARGET - now;
+
+    if (diff <= 0) {
+      timerEl.textContent = 'IT IS TIME';
+      timerEl.className = 'open';
+      timerLabel.textContent = '';
+      timerSub.textContent = 'help her';
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    timerEl.textContent = 
+      String(days).padStart(2, '0') + ':' +
+      String(hours).padStart(2, '0') + ':' +
+      String(minutes).padStart(2, '0') + ':' +
+      String(seconds).padStart(2, '0');
+
+    if (diff < 1000 * 60 * 60 * 24) {
+      timerEl.className = 'soon';
+    }
+  }
+
+  updateTimer();
+  setInterval(updateTimer, 1000);
+
   let audioEnabled = false;
   let audioUnlocked = false;
 
   const music = document.getElementById('bgMusic');
+  const timerSound = document.getElementById('timerSound');
   const audioControl = document.getElementById('audio-control');
 
   music.volume = 0;
+  timerSound.volume = 0;
+
+  function playBoth() {
+    music.play().then(() => {
+      let vol = 0;
+      const fade1 = setInterval(() => {
+        vol += 0.02;
+        if (vol >= 0.4) { vol = 0.4; clearInterval(fade1); }
+        music.volume = vol;
+      }, 100);
+    }).catch(() => {});
+
+    timerSound.play().then(() => {
+      let vol = 0;
+      const fade2 = setInterval(() => {
+        vol += 0.02;
+        if (vol >= 0.4) { vol = 0.4; clearInterval(fade2); }
+        timerSound.volume = vol;
+      }, 100);
+    }).catch(() => {});
+  }
+
+  function pauseBoth() {
+    music.pause();
+    timerSound.pause();
+  }
+
+  function resumeBoth() {
+    music.play().catch(() => {});
+    timerSound.play().catch(() => {});
+  }
 
   function tryAutoPlay() {
     music.volume = 0;
-    const p = music.play();
-    if (p !== undefined) {
-      p.then(() => {
+    timerSound.volume = 0;
+
+    const p1 = music.play();
+    if (p1 !== undefined) {
+      p1.then(() => {
         audioEnabled = true;
         audioUnlocked = true;
         audioControl.classList.add('on');
         audioControl.textContent = '♪ вкл';
-        fadeIn();
+        playBoth();
       }).catch(() => { audioEnabled = false; });
     }
   }
-<!-- 
-  я найду выход. 
-  я вернусь 
--->
-
-  function fadeIn() {
-    let vol = 0;
-    const fade = setInterval(() => {
-      vol += 0.02;
-      if (vol >= 0.5) { vol = 0.5; clearInterval(fade); }
-      music.volume = vol;
-    }, 100);
-  }
-<!-- 
-  я найду выход. 
-  я вернусь 
--->
 
   function unlockAudio() {
     if (audioUnlocked) return;
@@ -179,7 +331,7 @@
         audioEnabled = true;
         audioControl.classList.add('on');
         audioControl.textContent = '♪ вкл';
-        fadeIn();
+        playBoth();
         window.removeEventListener('mousemove', unlockAudio);
         window.removeEventListener('click', unlockAudio);
         window.removeEventListener('keydown', unlockAudio);
@@ -188,31 +340,19 @@
       }).catch(() => {});
     }
   }
-<!-- 
-  я найду выход. 
-  я вернусь 
--->
 
   window.addEventListener('mousemove', unlockAudio);
   window.addEventListener('click', unlockAudio);
   window.addEventListener('keydown', unlockAudio);
   window.addEventListener('touchstart', unlockAudio);
   window.addEventListener('scroll', unlockAudio);
-<!-- 
-  я найду выход. 
-  я вернусь 
--->
 
   tryAutoPlay();
-<!-- 
-  я найду выход. 
-  я вернусь 
--->
 
   audioControl.addEventListener('click', (e) => {
     e.stopPropagation();
     if (audioEnabled) {
-      music.pause();
+      pauseBoth();
       audioEnabled = false;
       audioControl.classList.remove('on');
       audioControl.textContent = '♪ выкл';
@@ -221,14 +361,11 @@
         audioEnabled = true;
         audioControl.classList.add('on');
         audioControl.textContent = '♪ вкл';
+        resumeBoth();
       }).catch(() => {});
     }
   });
 </script>
-<!-- 
-  я найду выход. 
-  я вернусь 
--->
 
 </body>
 </html>
