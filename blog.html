@@ -8,9 +8,9 @@
 
   html, body {
     width: 100%;
-    height: 100%;
+    min-height: 100%;
     background: #000;
-    overflow: hidden;
+    overflow-x: hidden;
     font-family: 'Courier New', monospace;
     cursor: default;
   }
@@ -62,61 +62,81 @@
     );
   }
 
-  #flicker {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(255,255,255,0.01);
-    pointer-events: none;
-    z-index: 4;
-    animation: flicker 5s infinite;
-  }
-
   #container {
     position: relative;
     z-index: 10;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    flex-direction: column;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 80px 40px;
   }
 
-  #tree {
-    width: 300px;
-    height: auto;
-    image-rendering: pixelated;
-    cursor: pointer;
-    transition: transform 0.3s;
-    user-select: none;
-    -webkit-user-drag: none;
+  #header {
+    color: #444;
+    font-size: 14px;
+    letter-spacing: 8px;
+    text-align: center;
+    margin-bottom: 80px;
+    animation: pulse 3s infinite;
   }
 
-  #tree:hover {
-    transform: scale(1.05);
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
   }
 
-  #friend {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-    z-index: 500;
-    display: none;
-    cursor: none;
+  .post {
+    margin-bottom: 60px;
+    opacity: 0;
+    transition: opacity 1.5s ease;
   }
 
-  #friend.active {
+  .post.visible {
+    opacity: 1;
+  }
+
+  .post-date {
+    color: #333;
+    font-size: 12px;
+    letter-spacing: 3px;
+    margin-bottom: 15px;
+  }
+
+  .post-text {
+    color: #ccc;
+    font-size: 16px;
+    line-height: 2;
+    white-space: pre-wrap;
+  }
+
+  .post-text.pink {
+    color: #ff6b9d;
+  }
+
+  .post-text.gray {
+    color: #555;
+  }
+
+  .post-text.red {
+    color: #ff5555;
+  }
+
+  .post-text.yellow {
+    color: #ffeb3b;
+  }
+
+  #back {
     display: block;
-    animation: shake 0.1s infinite;
+    text-align: center;
+    color: #333;
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-decoration: none;
+    margin-top: 100px;
+    transition: color 0.3s;
   }
 
-  @keyframes shake {
-    0% { transform: translate(0); }
-    25% { transform: translate(-5px, 5px); }
-    50% { transform: translate(5px, -5px); }
-    75% { transform: translate(-5px, -5px); }
-    100% { transform: translate(0); }
+  #back:hover {
+    color: #ff6b9d;
   }
 
   #audio-control {
@@ -140,13 +160,12 @@
 
 <div id="vignette"></div>
 <div id="scanlines"></div>
-<div id="flicker"></div>
 
 <div id="container">
-  <img id="tree" src="man.gif" alt="">
+  <div id="header">undraeel</div>
+  <div id="posts"></div>
+  <a href="/" id="back">← назад</a>
 </div>
-
-<img id="friend" src="friend.gif" alt="">
 
 <div id="audio-control">♪ выкл</div>
 
@@ -157,26 +176,49 @@
 <script>
   let audioEnabled = false;
   let audioUnlocked = false;
-  let triggered = false;
+  let posts = [];
 
   const music = document.getElementById('bgMusic');
   const audioControl = document.getElementById('audio-control');
-  const tree = document.getElementById('tree');
-  const friend = document.getElementById('friend');
+  const postsContainer = document.getElementById('posts');
 
+  // ===== ЗАГРУЗКА ПОСТОВ =====
+  fetch('posts.json')
+    .then(response => response.json())
+    .then(data => {
+      posts = data;
+      renderPosts();
+    })
+    .catch(() => {
+      postsContainer.innerHTML = '<div class="post-text gray">...</div>';
+    });
+
+  function renderPosts() {
+    posts.forEach((post, index) => {
+      const div = document.createElement('div');
+      div.className = 'post';
+      
+      let className = 'post-text';
+      if (post.color === 'pink') className += ' pink';
+      if (post.color === 'gray') className += ' gray';
+      if (post.color === 'red') className += ' red';
+      if (post.color === 'yellow') className += ' yellow';
+
+      div.innerHTML = `
+        <div class="post-date">${post.date} — ${post.time}</div>
+        <div class="${className}">${post.text}</div>
+      `;
+      
+      postsContainer.appendChild(div);
+      
+      setTimeout(() => {
+        div.classList.add('visible');
+      }, 300 + index * 400);
+    });
+  }
+
+  // ===== АУДИО =====
   music.volume = 0;
-
-  tree.addEventListener('click', () => {
-    if (triggered) return;
-    triggered = true;
-
-    friend.classList.add('active');
-    music.volume = 1;
-
-    setTimeout(() => {
-      window.location.href = 'about:blank';
-    }, 2500);
-  });
 
   function tryAutoPlay() {
     music.volume = 0;
@@ -196,7 +238,7 @@
     let vol = 0;
     const fade = setInterval(() => {
       vol += 0.02;
-      if (vol >= 0.5) { vol = 0.5; clearInterval(fade); }
+      if (vol >= 0.3) { vol = 0.3; clearInterval(fade); }
       music.volume = vol;
     }, 100);
   }

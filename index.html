@@ -185,6 +185,26 @@
     font-family: 'Courier New', monospace;
   }
 
+  /* ===== КНОПКА BLOG ===== */
+  #blog-link {
+    display: inline-block;
+    color: #333;
+    font-size: 14px;
+    letter-spacing: 6px;
+    text-decoration: none;
+    padding: 12px 40px;
+    border: 1px solid #222;
+    transition: all 0.4s;
+    font-family: 'Courier New', monospace;
+    margin-top: 20px;
+  }
+
+  #blog-link:hover {
+    color: #ff6b9d;
+    border-color: #ff6b9d;
+    letter-spacing: 10px;
+  }
+
   #audio-control {
     position: fixed;
     bottom: 15px;
@@ -216,12 +236,18 @@
     <div id="timer">00:00:00:00</div>
     <span id="timer-sub">she can't get out alone</span>
   </div>
+
+  <a href="/blog" id="blog-link">blog</a>
 </div>
 
 <div id="audio-control">♪ выкл</div>
 
 <audio id="bgMusic" loop>
   <source src="dess.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="timerSound" loop>
+  <source src="timer.mp3" type="audio/mpeg">
 </audio>
 
 <script>
@@ -264,6 +290,7 @@
 
   let audioEnabled = false;
   let audioUnlocked = false;
+  let timerSoundEnabled = false;
 
   const music = document.getElementById('bgMusic');
   const timerSound = document.getElementById('timerSound');
@@ -272,49 +299,43 @@
   music.volume = 0;
   timerSound.volume = 0;
 
-  function playBoth() {
-    music.play().then(() => {
-      let vol = 0;
-      const fade1 = setInterval(() => {
-        vol += 0.02;
-        if (vol >= 0.4) { vol = 0.4; clearInterval(fade1); }
-        music.volume = vol;
-      }, 100);
-    }).catch(() => {});
-
-    timerSound.play().then(() => {
-      let vol = 0;
-      const fade2 = setInterval(() => {
-        vol += 0.02;
-        if (vol >= 0.4) { vol = 0.4; clearInterval(fade2); }
-        timerSound.volume = vol;
-      }, 100);
-    }).catch(() => {});
-  }
-
-  function pauseBoth() {
-    music.pause();
-    timerSound.pause();
-  }
-
-  function resumeBoth() {
-    music.play().catch(() => {});
-    timerSound.play().catch(() => {});
-  }
-
   function tryAutoPlay() {
     music.volume = 0;
-    timerSound.volume = 0;
-
-    const p1 = music.play();
-    if (p1 !== undefined) {
-      p1.then(() => {
+    const p = music.play();
+    if (p !== undefined) {
+      p.then(() => {
         audioEnabled = true;
         audioUnlocked = true;
         audioControl.classList.add('on');
         audioControl.textContent = '♪ вкл';
-        playBoth();
+        fadeInMusic();
+        startTimerSound();
       }).catch(() => { audioEnabled = false; });
+    }
+  }
+
+  function fadeInMusic() {
+    let vol = 0;
+    const fade = setInterval(() => {
+      vol += 0.02;
+      if (vol >= 0.4) { vol = 0.4; clearInterval(fade); }
+      music.volume = vol;
+    }, 100);
+  }
+
+  function startTimerSound() {
+    timerSound.volume = 0;
+    const p = timerSound.play();
+    if (p !== undefined) {
+      p.then(() => {
+        timerSoundEnabled = true;
+        let vol = 0;
+        const fade = setInterval(() => {
+          vol += 0.02;
+          if (vol >= 0.4) { vol = 0.4; clearInterval(fade); }
+          timerSound.volume = vol;
+        }, 100);
+      }).catch(() => {});
     }
   }
 
@@ -327,7 +348,8 @@
         audioEnabled = true;
         audioControl.classList.add('on');
         audioControl.textContent = '♪ вкл';
-        playBoth();
+        fadeInMusic();
+        startTimerSound();
         window.removeEventListener('mousemove', unlockAudio);
         window.removeEventListener('click', unlockAudio);
         window.removeEventListener('keydown', unlockAudio);
@@ -348,8 +370,10 @@
   audioControl.addEventListener('click', (e) => {
     e.stopPropagation();
     if (audioEnabled) {
-      pauseBoth();
+      music.pause();
+      timerSound.pause();
       audioEnabled = false;
+      timerSoundEnabled = false;
       audioControl.classList.remove('on');
       audioControl.textContent = '♪ выкл';
     } else {
@@ -357,7 +381,11 @@
         audioEnabled = true;
         audioControl.classList.add('on');
         audioControl.textContent = '♪ вкл';
-        resumeBoth();
+        if (!timerSoundEnabled) {
+          startTimerSound();
+        } else {
+          timerSound.play();
+        }
       }).catch(() => {});
     }
   });

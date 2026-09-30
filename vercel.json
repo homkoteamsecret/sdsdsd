@@ -2,8 +2,8 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/me", "destination": "/me.html" },
-    { "source": "/mydream", "destination": "/mydream.html" }
+    { "source": "/blog", "destination": "/blog.html" },
+    { "source": "/me", "destination": "/me.html" }
   ],
   "headers": [
     {
@@ -25,21 +25,9 @@
       ]
     },
     {
-      "source": "/(.*).jpe",
+      "source": "/(.*).json",
       "headers": [
-        { "key": "Content-Type", "value": "image/jpeg" }
-      ]
-    },
-    {
-      "source": "/(.*).jpeg",
-      "headers": [
-        { "key": "Content-Type", "value": "image/jpeg" }
-      ]
-    },
-    {
-      "source": "/(.*).jpg",
-      "headers": [
-        { "key": "Content-Type", "value": "image/jpeg" }
+        { "key": "Content-Type", "value": "application/json" }
       ]
     }
   ]
