@@ -2,8 +2,12 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/blog", "destination": "/blog.html" },
-    { "source": "/me", "destination": "/me.html" }
+    { "source": "/666", "destination": "/666.html" },
+    { "source": "/gaster", "destination": "/666.html" },
+    { "source": "/f", "destination": "/f.html" },
+    { "source": "/terminal", "destination": "/terminal.html" },
+    { "source": "/depths", "destination": "/depths.html" },
+    { "source": "/man", "destination": "/man.html" }
   ],
   "headers": [
     {
@@ -25,9 +29,9 @@
       ]
     },
     {
-      "source": "/(.*).json",
+      "source": "/(.*).mp4",
       "headers": [
-        { "key": "Content-Type", "value": "application/json" }
+        { "key": "Content-Type", "value": "video/mp4" }
       ]
     }
   ]

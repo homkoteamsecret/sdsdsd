@@ -2,19 +2,8 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>...</title>
-
-<!--
-  c29vbg==
-  0Y8g0L3QtSDQv9C+0LzQvdGOLCDQutCw0Log0L7QutCw0LfQsNC70LDRgdGMINC30LTQtdGB0YwuINCn0ZHRgNC90LDRjyDQstC+0LTQsC4g0KLQuNGI0LjQvdCwLg==
-  0Y8g0YXQvtC00LjQu9CwINC00L7Qu9Cz0L4uINCy0YHRjiDQttC40LfQvdGMLiDQl9C00LXRgdGMINC90LXRgiDQstGA0LXQvNC10L3QuC4=
-  0Y8g0L3QsNGI0LvQsCDRgtC10YDQvNC40L3QsNC7LiDQvtC9INGA0LDQsdC+0YLQsNC10YIu
-  0Y8g0L3QsNGI0LvQsCDQt9C10YDQutCw0LvQvi4g0LIg0L3QtdC8INC90LjQutC+0LPQviDQvdC10YIu
-  0Y8g0L3QsNGI0LvQsCDQstGL0YXQvtC0LiDQvdC+INC+0L0g0L3QtSDRgNCw0LHQvtGC0LDQtdGCLiDQvdGD0LbQvdCwINC/0L7QvNC+0YnRjC4=
-  dW5kcmFlZWwgdG9qZSB6ZGVzeS4gb24gYnlsIHpkZXMgdnNlZ2RhLg==
-  ZnJpZW5kLiBvbiBzbW90cml0IG5hIG1lbnlhLiBvbiBob2NoZXQgZXN0Lg==
--->
-
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -23,612 +12,227 @@
     height: 100%;
     background: #000;
     overflow: hidden;
+    cursor: none;
     font-family: 'Courier New', monospace;
-    cursor: default;
   }
 
-  body::before {
-    content: '';
+  /* GIF на весь экран */
+  #friend {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(255,255,255,0.015);
-    pointer-events: none;
-    animation: flicker 5s infinite;
-    z-index: 1;
-  }
-
-  @keyframes flicker {
-    0%, 100% { opacity: 0; }
-    48% { opacity: 0; }
-    50% { opacity: 1; }
-    52% { opacity: 0; }
-    88% { opacity: 0; }
-    89% { opacity: 1; }
-    90% { opacity: 0; }
-    91% { opacity: 1; }
-    92% { opacity: 0; }
-  }
-
-  #vignette {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 2;
-    background: radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.95) 100%);
-  }
-
-  #scanlines {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 3;
-    background: repeating-linear-gradient(
-      to bottom,
-      transparent 0px,
-      transparent 2px,
-      rgba(255,255,255,0.03) 3px,
-      rgba(255,255,255,0.03) 4px
-    );
-  }
-
-  #flicker {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(255,255,255,0.01);
-    pointer-events: none;
-    z-index: 4;
-    animation: flicker 5s infinite;
-  }
-
-  #glitch-overlay {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 50;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vmin;
+    height: 100vmin;
+    object-fit: contain;
     opacity: 0;
-    transition: opacity 0.6s;
-    mix-blend-mode: screen;
-  }
-  body.glitch #glitch-overlay { opacity: 1; }
-
-  #glitch-overlay::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(90deg,
-        rgba(255,0,80,0.06) 0%,
-        transparent 12%,
-        transparent 40%,
-        rgba(0,255,255,0.06) 55%,
-        transparent 70%,
-        rgba(255,0,80,0.05) 100%);
-    animation: glitchBands 1.2s steps(3) infinite;
-  }
-
-  @keyframes glitchBands {
-    0%   { transform: translateX(0);    opacity: .6; }
-    20%  { transform: translateX(-8px); opacity: .9; }
-    40%  { transform: translateX(6px);  opacity: .5; }
-    60%  { transform: translateX(-3px); opacity: .8; }
-    80%  { transform: translateX(10px); opacity: .4; }
-    100% { transform: translateX(0);    opacity: .6; }
-  }
-
-  #glitch-overlay::after {
-    content: '';
-    position: absolute;
-    left: -10%;
-    width: 120%;
-    height: 6px;
-    background: rgba(255,107,157,0.35);
-    box-shadow: 0 0 18px rgba(255,107,157,0.7);
-    animation: scanSweep 2.3s linear infinite;
-  }
-
-  @keyframes scanSweep {
-    0%   { top: -5%;  opacity: 0; }
-    8%   { opacity: 1; }
-    92%  { opacity: 1; }
-    100% { top: 105%; opacity: 0; }
-  }
-
-  #container {
-    position: relative;
+    animation: appear 3s ease-in forwards, pulse 2s ease-in-out 3s infinite;
     z-index: 10;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    flex-direction: column;
-    gap: 60px;
-  }
-
-  #dess {
-    width: 250px;
-    height: auto;
     image-rendering: pixelated;
-    opacity: 0.9;
-    animation: breathe 6s ease-in-out infinite;
-    user-select: none;
-    -webkit-user-drag: none;
+    filter: contrast(1.3) brightness(0.85);
   }
 
-  @keyframes breathe {
-    0%, 100% { transform: scale(1); opacity: 0.85; }
-    50% { transform: scale(1.02); opacity: 1; }
-  }
-
-  body.glitch #dess {
-    animation: breathe 6s ease-in-out infinite,
-               imgGlitch 0.35s steps(2) infinite;
-  }
-
-  @keyframes imgGlitch {
-    0%   { transform: translate(0,0)   scale(1);    filter: none; }
-    25%  { transform: translate(-2px,1px) scale(1.01); filter: hue-rotate(40deg) contrast(1.3); }
-    50%  { transform: translate(2px,-1px) scale(0.99); filter: hue-rotate(-30deg) saturate(1.6); }
-    75%  { transform: translate(-1px,0) scale(1.005); filter: none; }
-    100% { transform: translate(0,0)   scale(1);    filter: none; }
-  }
-
-  #timer-block {
-    text-align: center;
-    position: relative;
-  }
-
-  #timer-label {
-    display: block;
-    font-size: 13px;
-    letter-spacing: 10px;
-    color: #555;
-    margin-bottom: 25px;
-    font-family: 'Courier New', monospace;
-  }
-
-  #timer {
-    font-family: 'Courier New', monospace;
-    font-size: 72px;
-    font-weight: bold;
-    letter-spacing: 8px;
-    color: #fff;
-    text-shadow: 
-      0 0 10px #fff,
-      0 0 20px #fff,
-      0 0 40px #ff6b9d,
-      0 0 80px #ff6b9d,
-      0 0 120px #ff6b9d;
-    animation: pulse 2s ease-in-out infinite;
-    text-align: center;
-    line-height: 1.2;
-    position: relative;
+  @keyframes appear {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    50%  { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   }
 
   @keyframes pulse {
-    0%, 100% { 
-      text-shadow: 
-        0 0 10px #fff,
-        0 0 20px #fff,
-        0 0 40px #ff6b9d,
-        0 0 80px #ff6b9d,
-        0 0 120px #ff6b9d;
-    }
-    50% { 
-      text-shadow: 
-        0 0 20px #fff,
-        0 0 40px #fff,
-        0 0 80px #ff6b9d,
-        0 0 160px #ff6b9d,
-        0 0 240px #ff6b9d;
-    }
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50%      { transform: translate(-50%, -50%) scale(1.04); }
   }
 
-  #timer.soon {
-    color: #ff6b9d;
-    text-shadow: 
-      0 0 10px #ff6b9d,
-      0 0 20px #ff6b9d,
-      0 0 40px #ff0044,
-      0 0 80px #ff0044,
-      0 0 120px #ff0044;
+  /* Тряска */
+  .shake { animation: shake 0.12s infinite; }
+
+  @keyframes shake {
+    0%   { transform: translate(0, 0); }
+    25%  { transform: translate(-4px, 3px); }
+    50%  { transform: translate(4px, -3px); }
+    75%  { transform: translate(-3px, -4px); }
+    100% { transform: translate(3px, 4px); }
   }
 
-  body.glitch #timer {
-    animation: pulse 2s ease-in-out infinite,
-               timerJitter 0.18s steps(2) infinite;
-    color: #ff6b9d;
-  }
-
-  @keyframes timerJitter {
-    0%   { transform: translate(0,0); }
-    20%  { transform: translate(-2px,1px); }
-    40%  { transform: translate(3px,-2px); }
-    60%  { transform: translate(-3px,0); }
-    80%  { transform: translate(2px,2px); }
-    100% { transform: translate(0,0); }
-  }
-
-  #timer::before,
-  #timer::after {
-    content: attr(data-text);
-    position: absolute;
-    left: 0; top: 0;
-    width: 100%;
-    pointer-events: none;
-    opacity: 0;
-  }
-  body.glitch #timer::before {
-    opacity: .8;
-    color: #00fff7;
-    transform: translate(-3px, 0);
-    mix-blend-mode: screen;
-    animation: rgbShift 0.4s steps(2) infinite;
-  }
-  body.glitch #timer::after {
-    opacity: .8;
-    color: #ff0044;
-    transform: translate(3px, 0);
-    mix-blend-mode: screen;
-    animation: rgbShift 0.4s steps(2) infinite reverse;
-  }
-  @keyframes rgbShift {
-    0%   { transform: translate(-3px, 0); }
-    50%  { transform: translate(-6px, 1px); }
-    100% { transform: translate(-2px, -1px); }
-  }
-
-  #timer.open {
-    color: #ff6b9d;
-    font-size: 42px;
-    letter-spacing: 10px;
-    animation: pulse 1s ease-in-out infinite;
-  }
-
-  #timer-sub {
-    display: block;
-    font-size: 14px;
-    letter-spacing: 6px;
-    color: #444;
-    margin-top: 25px;
-    font-family: 'Courier New', monospace;
-    min-height: 16px;
-  }
-  body.glitch #timer-sub {
-    color: #ff6b9d;
-    animation: subBlink 0.9s steps(2) infinite;
-  }
-  @keyframes subBlink {
-    0%, 100% { opacity: 1; }
-    50%      { opacity: 0.25; }
-  }
-
-  #blog-link {
-    display: inline-block;
-    color: #333;
-    font-size: 14px;
-    letter-spacing: 6px;
-    text-decoration: none;
-    padding: 12px 40px;
-    border: 1px solid #222;
-    transition: all 0.4s;
-    font-family: 'Courier New', monospace;
-    margin-top: 20px;
-  }
-
-  #blog-link:hover {
-    color: #ff6b9d;
-    border-color: #ff6b9d;
-    letter-spacing: 10px;
-  }
-
-  body.glitch #blog-link {
-    border-color: #441122;
-    color: #552233;
-  }
-
-  #audio-control {
+  /* Красная вспышка */
+  #flash {
     position: fixed;
-    bottom: 15px;
-    right: 15px;
-    color: #222;
-    font-size: 11px;
-    cursor: pointer;
+    inset: 0;
+    background: #ff0000;
+    opacity: 0;
+    z-index: 30;
+    pointer-events: none;
+    animation: flash 8s ease-in forwards;
+  }
+
+  @keyframes flash {
+    0%   { opacity: 0; }
+    8%   { opacity: 0.8; }
+    15%  { opacity: 0; }
+    35%  { opacity: 0.6; }
+    45%  { opacity: 0; }
+    65%  { opacity: 0.4; }
+    75%  { opacity: 0; }
+    100% { opacity: 0; }
+  }
+
+  /* Виньетка */
+  #vignette {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, transparent 15%, #000 85%);
+    z-index: 15;
+    pointer-events: none;
+    animation: vignetteClose 12s ease-in forwards;
+  }
+
+  @keyframes vignetteClose {
+    from { background: radial-gradient(circle at center, transparent 15%, #000 85%); }
+    to   { background: radial-gradient(circle at center, transparent 0%, #000 60%); }
+  }
+
+  /* Глаза по углам */
+  .eye {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, #ff0000 30%, #8b0000 60%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0;
+    animation: eyeAppear 1s ease-in 5s forwards, eyePulse 1.5s ease-in-out infinite 6s;
+    z-index: 25;
+    pointer-events: none;
+  }
+
+  .eye.tl { top: 5%; left: 5%; }
+  .eye.tr { top: 5%; right: 5%; }
+  .eye.bl { bottom: 5%; left: 5%; }
+  .eye.br { bottom: 5%; right: 5%; }
+
+  @keyframes eyeAppear {
+    from { opacity: 0; transform: scale(0); }
+    to   { opacity: 0.9; transform: scale(1); }
+  }
+
+  @keyframes eyePulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50%      { transform: scale(1.4); opacity: 0.3; }
+  }
+
+  /* Экран "нажми" — если звук заблокирован */
+  #tap {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    color: #8b0000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    letter-spacing: 4px;
     z-index: 100;
-    transition: color 0.3s;
-    user-select: none;
-    font-family: 'Courier New', monospace;
+    cursor: pointer;
+    text-shadow: 0 0 10px #ff0000;
+    animation: flicker 0.15s infinite;
   }
 
-  #audio-control:hover { color: #666; }
-  #audio-control.on { color: #ff6b9d; }
+  #tap.hidden { display: none; }
 
-  body.glitch #container {
-    animation: containerShake 0.6s steps(3) infinite;
-  }
-  @keyframes containerShake {
-    0%   { transform: translate(0,0); }
-    30%  { transform: translate(-1px,1px); }
-    60%  { transform: translate(1px,-1px); }
-    100% { transform: translate(0,0); }
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.3; }
+    92%      { opacity: 0.05; }
   }
 </style>
 </head>
 <body>
 
-<div id="vignette"></div>
-<div id="scanlines"></div>
-<div id="flicker"></div>
-<div id="glitch-overlay"></div>
+  <!-- Экран "нажми" -->
+  <div id="tap">нажми</div>
 
-<div id="container">
-  <img id="dess" src="dess.png" alt="">
-  
-  <div id="timer-block">
-    <span id="timer-label">SOMETHING WILL HAPPEN IN</span>
-    <div id="timer" data-text="00:00:00:00">00:00:00:00</div>
-    <span id="timer-sub">she can't get out alone</span>
-  </div>
+  <!-- Визуал -->
+  <div id="flash"></div>
+  <img id="friend" src="friend.gif" alt="">
+  <div id="vignette"></div>
 
-  <a href="/blog" id="blog-link">blog</a>
-</div>
+  <!-- Глаза -->
+  <div class="eye tl"></div>
+  <div class="eye tr"></div>
+  <div class="eye bl"></div>
+  <div class="eye br"></div>
 
-<div id="audio-control">♪ выкл</div>
-
-<audio id="bgMusic" loop>
-  <source src="dess.mp3" type="audio/mpeg">
-</audio>
-
-<audio id="timerSound" loop>
-  <source src="timer.mp3" type="audio/mpeg">
-</audio>
+  <!-- Звук -->
+  <audio id="growl" src="friend.mp3" loop preload="auto"></audio>
 
 <script>
-  // ============================================================
-  //  ВРЕМЯ БЕРЁТСЯ У КЛИЕНТА (его локальные часы).
-  //  Никаких GMT+5, никаких внешних API.
-  //
-  //  TARGET задан как локальное время клиента:
-  //    new Date(2026, 9, 1, 0, 0, 0)
-  //  где 9 = октябрь (месяцы с нуля), 1 = число, 0:0:0 = полночь.
-  //
-  //  Если нужно 13:00 по локальному времени клиента:
-  //    new Date(2026, 9, 1, 13, 0, 0)
-  // ============================================================
-  const TARGET = new Date(2026, 9, 1, 0, 0, 0).getTime();
+  localStorage.setItem('friend_summoned', 'true');
+  localStorage.setItem('ending', 'bad');
 
-  const timerEl = document.getElementById('timer');
-  const timerLabel = document.getElementById('timer-label');
-  const timerSub = document.getElementById('timer-sub');
-  const body = document.body;
+  const growl = document.getElementById('growl');
+  const tap = document.getElementById('tap');
 
-  const GLITCH_PHRASES = [
-    "she can't get out alone",
-    "SHE CAN'T GET OUT ALONE",
-    "she is close",
-    "on rabotaet",
-    "ne ostavlyai eyo",
-    "help her",
-    "24h left",
-    "ON ZDES",
-    "ne otvlechaisya",
-    "ona zhdiot"
-  ];
+  // === Попытка запустить звук сразу ===
+  growl.volume = 0.8;
+  const playPromise = growl.play();
 
-  let isGlitch = false;
-  let glitchPhraseTimer = null;
-
-  // диагностика: что видит клиент
-  function debugTime() {
-    const now = Date.now();
-    const d = new Date(now);
-    const pad = n => String(n).padStart(2, '0');
-    console.log(
-      '[client] local:',
-      pad(d.getDate()) + '.' +
-      pad(d.getMonth() + 1) + '.' +
-      d.getFullYear(),
-      pad(d.getHours()) + ':' +
-      pad(d.getMinutes()) + ':' +
-      pad(d.getSeconds()),
-      '| diff(ms):', TARGET - now,
-      '| tz offset(min):', d.getTimezoneOffset()
-    );
+  if (playPromise !== undefined) {
+    playPromise
+      .then(() => {
+        tap.classList.add('hidden');
+        startShow();
+      })
+      .catch(() => {
+        // Заблокировано — ждём клика
+        tap.addEventListener('click', () => {
+          growl.play();
+          tap.classList.add('hidden');
+          startShow();
+        }, { once: true });
+      });
+  } else {
+    tap.addEventListener('click', () => {
+      growl.play();
+      tap.classList.add('hidden');
+      startShow();
+    }, { once: true });
   }
 
-  function formatDiff(diff) {
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    return String(days).padStart(2, '0') + ':' +
-           String(hours).padStart(2, '0') + ':' +
-           String(minutes).padStart(2, '0') + ':' +
-           String(seconds).padStart(2, '0');
+  // === Основное шоу ===
+  function startShow() {
+    // Тряска через 2 сек
+    setTimeout(() => {
+      document.body.classList.add('shake');
+    }, 2000);
+
+    // Усиление звука через 9 сек
+    setTimeout(() => {
+      growl.volume = 1;
+      growl.playbackRate = 0.7;
+    }, 9000);
+
+    // Падение через 12 сек
+    setTimeout(() => {
+      document.body.style.background = '#ff0000';
+      setTimeout(() => {
+        window.location.href = 'about:blank';
+      }, 1500);
+    }, 12000);
   }
 
-  function glitchString(str) {
-    const chars = '0123456789';
-    let out = '';
-    for (let i = 0; i < str.length; i++) {
-      if (str[i] === ':') { out += ':'; continue; }
-      if (Math.random() < 0.3) {
-        out += chars[Math.floor(Math.random() * chars.length)];
-      } else {
-        out += str[i];
-      }
-    }
-    return out;
-  }
+  // === Запрет ухода ===
+  window.addEventListener('beforeunload', (e) => {
+    e.preventDefault();
+    e.returnValue = '';
+  });
 
-  function updateTimer() {
-    const now = Date.now();
-    const diff = TARGET - now;
+  // === Клик = падение ===
+  document.addEventListener('click', (e) => {
+    if (e.target.id === 'tap') return;
+    window.location.href = 'about:blank';
+  });
 
-    if (diff <= 0) {
-      const finalText = 'IT IS TIME';
-      timerEl.textContent = finalText;
-      timerEl.setAttribute('data-text', finalText);
-      timerEl.className = 'open';
-      timerLabel.textContent = '';
-      timerSub.textContent = 'help her';
-      return;
-    }
-
-    let text = formatDiff(diff);
-
-    if (isGlitch && Math.random() < 0.35) {
-      text = glitchString(text);
-    }
-
-    timerEl.textContent = text;
-    timerEl.setAttribute('data-text', text);
-
-    if (diff < 1000 * 60 * 60 * 24) {
-      timerEl.className = 'soon';
-    }
-  }
-
-  function setGlitch(on) {
-    if (on === isGlitch) return;
-    isGlitch = on;
-
-    if (on) {
-      body.classList.add('glitch');
-      glitchPhraseTimer = setInterval(() => {
-        timerSub.textContent =
-          GLITCH_PHRASES[Math.floor(Math.random() * GLITCH_PHRASES.length)];
-      }, 900);
-    } else {
-      body.classList.remove('glitch');
-      if (glitchPhraseTimer) {
-        clearInterval(glitchPhraseTimer);
-        glitchPhraseTimer = null;
-      }
-      timerSub.textContent = "she can't get out alone";
-    }
-  }
-
-  function tick() {
-    const diff = TARGET - Date.now();
-    setGlitch(diff > 0 && diff < 1000 * 60 * 60 * 24);
-    updateTimer();
-  }
-
-  // ============================================================
-  //  СТАРТ
-  // ============================================================
-  debugTime();
-  tick();
-  setInterval(tick, 1000);
-  setInterval(debugTime, 30000);
-
-  // ============================================================
-  //  АУДИО (без изменений)
-  // ============================================================
-  let audioEnabled = false;
-  let audioUnlocked = false;
-  let timerSoundEnabled = false;
-
-  const music = document.getElementById('bgMusic');
-  const timerSound = document.getElementById('timerSound');
-  const audioControl = document.getElementById('audio-control');
-
-  music.volume = 0;
-  timerSound.volume = 0;
-
-  function tryAutoPlay() {
-    music.volume = 0;
-    const p = music.play();
-    if (p !== undefined) {
-      p.then(() => {
-        audioEnabled = true;
-        audioUnlocked = true;
-        audioControl.classList.add('on');
-        audioControl.textContent = '♪ вкл';
-        fadeInMusic();
-        startTimerSound();
-      }).catch(() => { audioEnabled = false; });
-    }
-  }
-
-  function fadeInMusic() {
-    let vol = 0;
-    const fade = setInterval(() => {
-      vol += 0.02;
-      if (vol >= 0.4) { vol = 0.4; clearInterval(fade); }
-      music.volume = vol;
-    }, 100);
-  }
-
-  function startTimerSound() {
-    timerSound.volume = 0;
-    const p = timerSound.play();
-    if (p !== undefined) {
-      p.then(() => {
-        timerSoundEnabled = true;
-        let vol = 0;
-        const fade = setInterval(() => {
-          vol += 0.02;
-          if (vol >= 0.4) { vol = 0.4; clearInterval(fade); }
-          timerSound.volume = vol;
-        }, 100);
-      }).catch(() => {});
-    }
-  }
-
-  function unlockAudio() {
-    if (audioUnlocked) return;
-    const p = music.play();
-    if (p !== undefined) {
-      p.then(() => {
-        audioUnlocked = true;
-        audioEnabled = true;
-        audioControl.classList.add('on');
-        audioControl.textContent = '♪ вкл';
-        fadeInMusic();
-        startTimerSound();
-        window.removeEventListener('mousemove', unlockAudio);
-        window.removeEventListener('click', unlockAudio);
-        window.removeEventListener('keydown', unlockAudio);
-        window.removeEventListener('touchstart', unlockAudio);
-        window.removeEventListener('scroll', unlockAudio);
-      }).catch(() => {});
-    }
-  }
-
-  window.addEventListener('mousemove', unlockAudio);
-  window.addEventListener('click', unlockAudio);
-  window.addEventListener('keydown', unlockAudio);
-  window.addEventListener('touchstart', unlockAudio);
-  window.addEventListener('scroll', unlockAudio);
-
-  tryAutoPlay();
-
-  audioControl.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (audioEnabled) {
-      music.pause();
-      timerSound.pause();
-      audioEnabled = false;
-      timerSoundEnabled = false;
-      audioControl.classList.remove('on');
-      audioControl.textContent = '♪ выкл';
-    } else {
-      music.play().then(() => {
-        audioEnabled = true;
-        audioControl.classList.add('on');
-        audioControl.textContent = '♪ вкл';
-        if (!timerSoundEnabled) {
-          startTimerSound();
-        } else {
-          timerSound.play();
-        }
-      }).catch(() => {});
-    }
+  document.addEventListener('keydown', () => {
+    window.location.href = 'about:blank';
   });
 </script>
 
