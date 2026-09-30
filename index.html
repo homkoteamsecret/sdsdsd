@@ -84,6 +84,59 @@
     animation: flicker 5s infinite;
   }
 
+  #glitch-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0;
+    transition: opacity 0.6s;
+    mix-blend-mode: screen;
+  }
+  body.glitch #glitch-overlay { opacity: 1; }
+
+  #glitch-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg,
+        rgba(255,0,80,0.06) 0%,
+        transparent 12%,
+        transparent 40%,
+        rgba(0,255,255,0.06) 55%,
+        transparent 70%,
+        rgba(255,0,80,0.05) 100%);
+    animation: glitchBands 1.2s steps(3) infinite;
+  }
+
+  @keyframes glitchBands {
+    0%   { transform: translateX(0);    opacity: .6; }
+    20%  { transform: translateX(-8px); opacity: .9; }
+    40%  { transform: translateX(6px);  opacity: .5; }
+    60%  { transform: translateX(-3px); opacity: .8; }
+    80%  { transform: translateX(10px); opacity: .4; }
+    100% { transform: translateX(0);    opacity: .6; }
+  }
+
+  #glitch-overlay::after {
+    content: '';
+    position: absolute;
+    left: -10%;
+    width: 120%;
+    height: 6px;
+    background: rgba(255,107,157,0.35);
+    box-shadow: 0 0 18px rgba(255,107,157,0.7);
+    animation: scanSweep 2.3s linear infinite;
+  }
+
+  @keyframes scanSweep {
+    0%   { top: -5%;  opacity: 0; }
+    8%   { opacity: 1; }
+    92%  { opacity: 1; }
+    100% { top: 105%; opacity: 0; }
+  }
+
   #container {
     position: relative;
     z-index: 10;
@@ -110,8 +163,22 @@
     50% { transform: scale(1.02); opacity: 1; }
   }
 
+  body.glitch #dess {
+    animation: breathe 6s ease-in-out infinite,
+               imgGlitch 0.35s steps(2) infinite;
+  }
+
+  @keyframes imgGlitch {
+    0%   { transform: translate(0,0)   scale(1);    filter: none; }
+    25%  { transform: translate(-2px,1px) scale(1.01); filter: hue-rotate(40deg) contrast(1.3); }
+    50%  { transform: translate(2px,-1px) scale(0.99); filter: hue-rotate(-30deg) saturate(1.6); }
+    75%  { transform: translate(-1px,0) scale(1.005); filter: none; }
+    100% { transform: translate(0,0)   scale(1);    filter: none; }
+  }
+
   #timer-block {
     text-align: center;
+    position: relative;
   }
 
   #timer-label {
@@ -138,6 +205,7 @@
     animation: pulse 2s ease-in-out infinite;
     text-align: center;
     line-height: 1.2;
+    position: relative;
   }
 
   @keyframes pulse {
@@ -169,6 +237,50 @@
       0 0 120px #ff0044;
   }
 
+  body.glitch #timer {
+    animation: pulse 2s ease-in-out infinite,
+               timerJitter 0.18s steps(2) infinite;
+    color: #ff6b9d;
+  }
+
+  @keyframes timerJitter {
+    0%   { transform: translate(0,0); }
+    20%  { transform: translate(-2px,1px); }
+    40%  { transform: translate(3px,-2px); }
+    60%  { transform: translate(-3px,0); }
+    80%  { transform: translate(2px,2px); }
+    100% { transform: translate(0,0); }
+  }
+
+  #timer::before,
+  #timer::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%;
+    pointer-events: none;
+    opacity: 0;
+  }
+  body.glitch #timer::before {
+    opacity: .8;
+    color: #00fff7;
+    transform: translate(-3px, 0);
+    mix-blend-mode: screen;
+    animation: rgbShift 0.4s steps(2) infinite;
+  }
+  body.glitch #timer::after {
+    opacity: .8;
+    color: #ff0044;
+    transform: translate(3px, 0);
+    mix-blend-mode: screen;
+    animation: rgbShift 0.4s steps(2) infinite reverse;
+  }
+  @keyframes rgbShift {
+    0%   { transform: translate(-3px, 0); }
+    50%  { transform: translate(-6px, 1px); }
+    100% { transform: translate(-2px, -1px); }
+  }
+
   #timer.open {
     color: #ff6b9d;
     font-size: 42px;
@@ -183,9 +295,17 @@
     color: #444;
     margin-top: 25px;
     font-family: 'Courier New', monospace;
+    min-height: 16px;
+  }
+  body.glitch #timer-sub {
+    color: #ff6b9d;
+    animation: subBlink 0.9s steps(2) infinite;
+  }
+  @keyframes subBlink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.25; }
   }
 
-  /* ===== КНОПКА BLOG ===== */
   #blog-link {
     display: inline-block;
     color: #333;
@@ -205,6 +325,11 @@
     letter-spacing: 10px;
   }
 
+  body.glitch #blog-link {
+    border-color: #441122;
+    color: #552233;
+  }
+
   #audio-control {
     position: fixed;
     bottom: 15px;
@@ -220,6 +345,16 @@
 
   #audio-control:hover { color: #666; }
   #audio-control.on { color: #ff6b9d; }
+
+  body.glitch #container {
+    animation: containerShake 0.6s steps(3) infinite;
+  }
+  @keyframes containerShake {
+    0%   { transform: translate(0,0); }
+    30%  { transform: translate(-1px,1px); }
+    60%  { transform: translate(1px,-1px); }
+    100% { transform: translate(0,0); }
+  }
 </style>
 </head>
 <body>
@@ -227,13 +362,14 @@
 <div id="vignette"></div>
 <div id="scanlines"></div>
 <div id="flicker"></div>
+<div id="glitch-overlay"></div>
 
 <div id="container">
   <img id="dess" src="dess.png" alt="">
   
   <div id="timer-block">
     <span id="timer-label">SOMETHING WILL HAPPEN IN</span>
-    <div id="timer">00:00:00:00</div>
+    <div id="timer" data-text="00:00:00:00">00:00:00:00</div>
     <span id="timer-sub">she can't get out alone</span>
   </div>
 
@@ -251,43 +387,148 @@
 </audio>
 
 <script>
-  const TARGET = new Date('2026-10-01T08:00:00Z').getTime();
+  // ============================================================
+  //  ВРЕМЯ БЕРЁТСЯ У КЛИЕНТА (его локальные часы).
+  //  Никаких GMT+5, никаких внешних API.
+  //
+  //  TARGET задан как локальное время клиента:
+  //    new Date(2026, 9, 1, 0, 0, 0)
+  //  где 9 = октябрь (месяцы с нуля), 1 = число, 0:0:0 = полночь.
+  //
+  //  Если нужно 13:00 по локальному времени клиента:
+  //    new Date(2026, 9, 1, 13, 0, 0)
+  // ============================================================
+  const TARGET = new Date(2026, 9, 1, 0, 0, 0).getTime();
 
   const timerEl = document.getElementById('timer');
   const timerLabel = document.getElementById('timer-label');
   const timerSub = document.getElementById('timer-sub');
+  const body = document.body;
+
+  const GLITCH_PHRASES = [
+    "she can't get out alone",
+    "SHE CAN'T GET OUT ALONE",
+    "she is close",
+    "on rabotaet",
+    "ne ostavlyai eyo",
+    "help her",
+    "24h left",
+    "ON ZDES",
+    "ne otvlechaisya",
+    "ona zhdiot"
+  ];
+
+  let isGlitch = false;
+  let glitchPhraseTimer = null;
+
+  // диагностика: что видит клиент
+  function debugTime() {
+    const now = Date.now();
+    const d = new Date(now);
+    const pad = n => String(n).padStart(2, '0');
+    console.log(
+      '[client] local:',
+      pad(d.getDate()) + '.' +
+      pad(d.getMonth() + 1) + '.' +
+      d.getFullYear(),
+      pad(d.getHours()) + ':' +
+      pad(d.getMinutes()) + ':' +
+      pad(d.getSeconds()),
+      '| diff(ms):', TARGET - now,
+      '| tz offset(min):', d.getTimezoneOffset()
+    );
+  }
+
+  function formatDiff(diff) {
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    return String(days).padStart(2, '0') + ':' +
+           String(hours).padStart(2, '0') + ':' +
+           String(minutes).padStart(2, '0') + ':' +
+           String(seconds).padStart(2, '0');
+  }
+
+  function glitchString(str) {
+    const chars = '0123456789';
+    let out = '';
+    for (let i = 0; i < str.length; i++) {
+      if (str[i] === ':') { out += ':'; continue; }
+      if (Math.random() < 0.3) {
+        out += chars[Math.floor(Math.random() * chars.length)];
+      } else {
+        out += str[i];
+      }
+    }
+    return out;
+  }
 
   function updateTimer() {
     const now = Date.now();
     const diff = TARGET - now;
 
     if (diff <= 0) {
-      timerEl.textContent = 'IT IS TIME';
+      const finalText = 'IT IS TIME';
+      timerEl.textContent = finalText;
+      timerEl.setAttribute('data-text', finalText);
       timerEl.className = 'open';
       timerLabel.textContent = '';
       timerSub.textContent = 'help her';
       return;
     }
 
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    let text = formatDiff(diff);
 
-    timerEl.textContent = 
-      String(days).padStart(2, '0') + ':' +
-      String(hours).padStart(2, '0') + ':' +
-      String(minutes).padStart(2, '0') + ':' +
-      String(seconds).padStart(2, '0');
+    if (isGlitch && Math.random() < 0.35) {
+      text = glitchString(text);
+    }
+
+    timerEl.textContent = text;
+    timerEl.setAttribute('data-text', text);
 
     if (diff < 1000 * 60 * 60 * 24) {
       timerEl.className = 'soon';
     }
   }
 
-  updateTimer();
-  setInterval(updateTimer, 1000);
+  function setGlitch(on) {
+    if (on === isGlitch) return;
+    isGlitch = on;
 
+    if (on) {
+      body.classList.add('glitch');
+      glitchPhraseTimer = setInterval(() => {
+        timerSub.textContent =
+          GLITCH_PHRASES[Math.floor(Math.random() * GLITCH_PHRASES.length)];
+      }, 900);
+    } else {
+      body.classList.remove('glitch');
+      if (glitchPhraseTimer) {
+        clearInterval(glitchPhraseTimer);
+        glitchPhraseTimer = null;
+      }
+      timerSub.textContent = "she can't get out alone";
+    }
+  }
+
+  function tick() {
+    const diff = TARGET - Date.now();
+    setGlitch(diff > 0 && diff < 1000 * 60 * 60 * 24);
+    updateTimer();
+  }
+
+  // ============================================================
+  //  СТАРТ
+  // ============================================================
+  debugTime();
+  tick();
+  setInterval(tick, 1000);
+  setInterval(debugTime, 30000);
+
+  // ============================================================
+  //  АУДИО (без изменений)
+  // ============================================================
   let audioEnabled = false;
   let audioUnlocked = false;
   let timerSoundEnabled = false;
