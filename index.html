@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>...</title>
+<title>Малиновый Гастер</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -14,10 +14,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
+    font-family: 'Courier New', monospace;
     cursor: default;
   }
 
-  /* Виньетка */
   #vignette {
     position: fixed;
     inset: 0;
@@ -26,7 +27,6 @@
     background: radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.95) 100%);
   }
 
-  /* Сканлайны */
   #scanlines {
     position: fixed;
     inset: 0;
@@ -36,18 +36,17 @@
       to bottom,
       transparent 0px,
       transparent 2px,
-      rgba(255,255,255,0.03) 3px,
-      rgba(255,255,255,0.03) 4px
+      rgba(255,107,157,0.03) 3px,
+      rgba(255,107,157,0.03) 4px
     );
   }
 
-  /* Мерцание */
   #flicker {
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 4;
-    background: rgba(255,255,255,0.02);
+    background: rgba(255,107,157,0.02);
     animation: flicker 5s infinite;
   }
 
@@ -63,32 +62,106 @@
     92% { opacity: 0; }
   }
 
-  /* Гастер */
+  /* ЗАГОЛОВОК */
+  #title {
+    position: relative;
+    z-index: 10;
+    color: #ff6b9d;
+    font-size: clamp(20px, 4vw, 36px);
+    font-weight: bold;
+    letter-spacing: 6px;
+    margin-bottom: 30px;
+    text-align: center;
+    text-shadow:
+      0 0 10px #ff6b9d,
+      0 0 20px #ff6b9d,
+      0 0 40px #ff0044;
+    animation: titlePulse 2s ease-in-out infinite;
+  }
+
+  @keyframes titlePulse {
+    0%, 100% {
+      text-shadow:
+        0 0 10px #ff6b9d,
+        0 0 20px #ff6b9d,
+        0 0 40px #ff0044;
+    }
+    50% {
+      text-shadow:
+        0 0 20px #ff6b9d,
+        0 0 40px #ff6b9d,
+        0 0 80px #ff0044,
+        0 0 120px #ff0044;
+    }
+  }
+
+  /* ГАСТЕР */
   #gaster {
     position: relative;
     z-index: 10;
-    width: 300px;
+    width: 280px;
     height: auto;
     image-rendering: pixelated;
-    opacity: 0.9;
     user-select: none;
     -webkit-user-drag: none;
-    animation: breathe 6s ease-in-out infinite, pulse 3s ease-in-out infinite;
-    filter: drop-shadow(0 0 20px #fff) drop-shadow(0 0 40px #888);
+    animation: bob 3s ease-in-out infinite;
+    filter:
+      drop-shadow(0 0 20px #ff6b9d)
+      drop-shadow(0 0 40px #ff0044)
+      drop-shadow(0 0 80px #ff0044);
   }
 
-  @keyframes breathe {
-    0%, 100% { transform: scale(1); opacity: 0.85; }
-    50%      { transform: scale(1.03); opacity: 1; }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50%      { transform: translateY(-12px) rotate(2deg); }
   }
 
-  @keyframes pulse {
-    0%, 100% {
-      filter: drop-shadow(0 0 20px #fff) drop-shadow(0 0 40px #888);
-    }
-    50% {
-      filter: drop-shadow(0 0 40px #fff) drop-shadow(0 0 80px #888);
-    }
+  /* ТЕКСТ */
+  #subtitle {
+    position: relative;
+    z-index: 10;
+    color: #ff6b9d;
+    font-size: 14px;
+    letter-spacing: 4px;
+    margin-top: 30px;
+    text-align: center;
+    line-height: 2.2;
+    text-shadow: 0 0 10px #ff6b9d;
+    white-space: pre-line;
+    opacity: 0;
+    animation: textIn 2s ease-in 1s forwards;
+  }
+
+  @keyframes textIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ПОДПИСЬ ВНИЗУ */
+  #files {
+    position: fixed;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    gap: 30px;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #333;
+    opacity: 0;
+    animation: textIn 2s ease-in 2s forwards;
+  }
+
+  #files .file {
+    color: #444;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  #files .file:hover {
+    color: #ff6b9d;
+    text-shadow: 0 0 10px #ff6b9d;
   }
 </style>
 </head>
@@ -98,16 +171,30 @@
 <div id="scanlines"></div>
 <div id="flicker"></div>
 
+<div id="title">МАЛИНОВЫЙ ГАСТЕР</div>
+
 <img id="gaster" src="gaster.png" alt="">
+
+<div id="subtitle">undraeel захвачен.
+
+малина стала стражем.
+она смотрит.
+она ждёт.
+она — малина.</div>
+
+<div id="files">
+  <a class="file" href="/gaster.png" target="_blank">gaster.png</a>
+  <a class="file" href="/gaster.mp3" target="_blank">gaster.mp3</a>
+</div>
 
 <audio id="gasterMusic" loop>
   <source src="gaster.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-// ============================================================
-//  МУЗЫКА — запуск при первом клике
-// ============================================================
+localStorage.setItem('undraeel_captured', 'true');
+localStorage.setItem('captured_by', 'malina');
+
 const music = document.getElementById('gasterMusic');
 music.volume = 0;
 
@@ -116,26 +203,25 @@ function playMusic() {
     let vol = 0;
     const fade = setInterval(() => {
       vol += 0.02;
-      if (vol >= 0.4) { vol = 0.4; clearInterval(fade); }
+      if (vol >= 0.3) { vol = 0.3; clearInterval(fade); }
       music.volume = vol;
     }, 100);
   }).catch(() => {});
 }
 
-// пробуем сразу
 playMusic();
-
-// если заблокировано — при первом клике
 document.addEventListener('click', playMusic, { once: true });
 document.addEventListener('keydown', playMusic, { once: true });
 
-// ============================================================
-//  КОНСОЛЬ
-// ============================================================
-console.log('%c...', 'color: #333; font-size: 20px;');
-console.log('%cон был первым.', 'color: #888; font-size: 14px;');
-console.log('%cон стёрт.', 'color: #888; font-size: 14px;');
-console.log('%cно он везде.', 'color: #fff; font-size: 14px; text-shadow: 0 0 10px #fff;');
+console.log('%cМАЛИНОВЫЙ ГАСТЕР', 'color: #ff6b9d; font-size: 24px; font-weight: bold; letter-spacing: 6px;');
+console.log('');
+console.log('%cОБНАРУЖЕН ЗАХВАТ', 'color: #ff0044; font-size: 14px; font-weight: bold;');
+console.log('%cundraeel: потерян.', 'color: #888; font-size: 12px;');
+console.log('%cзахватчик: малина.', 'color: #ff6b9d; font-size: 12px;');
+console.log('');
+console.log('%cона была первой.', 'color: #888; font-size: 12px;');
+console.log('%cона стёрта.', 'color: #888; font-size: 12px;');
+console.log('%cно она везде.', 'color: #ff6b9d; font-size: 12px; text-shadow: 0 0 10px #ff6b9d;');
 </script>
 
 </body>
