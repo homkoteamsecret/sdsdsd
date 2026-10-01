@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>susie</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+    cursor: default;
+  }
+
+  #vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.95) 100%);
+  }
+
+  #scanlines {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(255,255,255,0.03) 3px,
+      rgba(255,255,255,0.03) 4px
+    );
+  }
+
+  #scene {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  /* ЧАШКА */
+  #cup {
+    position: relative;
+    width: 400px;
+    height: 300px;
+    background: linear-gradient(180deg,
+      rgba(180,140,80,0.9) 0%,
+      rgba(120,80,40,0.95) 100%);
+    border: 6px solid #5a3a1a;
+    border-top: 8px solid #8b5a2b;
+    border-radius: 12px 12px 60px 60px;
+    box-shadow:
+      inset 0 20px 40px rgba(0,0,0,0.5),
+      0 20px 60px rgba(0,0,0,0.8),
+      0 0 100px rgba(255,107,157,0.15);
+    overflow: hidden;
+    z-index: 5;
+  }
+
+  /* РУЧКА ЧАШКИ */
+  #cup::after {
+    content: '';
+    position: absolute;
+    top: 60px;
+    right: -60px;
+    width: 80px;
+    height: 100px;
+    border: 8px solid #5a3a1a;
+    border-left: none;
+    border-radius: 0 50% 50% 0;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+  }
+
+  /* ЖИДКОСТЬ */
+  #liquid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 15%;
+    background: linear-gradient(180deg,
+      rgba(80,40,20,0.8) 0%,
+      rgba(40,20,10,0.9) 100%);
+    border-bottom: 3px solid rgba(255,255,255,0.1);
+    z-index: 6;
+    animation: liquidWave 3s ease-in-out infinite;
+  }
+
+  @keyframes liquidWave {
+    0%, 100% { height: 15%; }
+    50%      { height: 18%; }
+  }
+
+  /* СЬЮЗИ GIF */
+  #susie {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 160px;
+    height: auto;
+    image-rendering: pixelated;
+    user-select: none;
+    -webkit-user-drag: none;
+    z-index: 7;
+    animation: float 3s ease-in-out infinite;
+    filter:
+      drop-shadow(0 0 10px #ff0066)
+      drop-shadow(0 0 20px #cc0055);
+    transform: translate(-50%, -50%);
+  }
+
+  @keyframes float {
+    0%, 100% { margin-top: 0; }
+    50%      { margin-top: -15px; }
+  }
+
+  /* НАДПИСЬ */
+  #title {
+    position: fixed;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ff0066;
+    font-size: 28px;
+    letter-spacing: 10px;
+    text-shadow:
+      0 0 10px #ff0066,
+      0 0 20px #cc0055,
+      0 0 40px #880033;
+    z-index: 20;
+    animation: titlePulse 2s ease-in-out infinite;
+  }
+
+  @keyframes titlePulse {
+    0%, 100% {
+      text-shadow:
+        0 0 10px #ff0066,
+        0 0 20px #cc0055;
+    }
+    50% {
+      text-shadow:
+        0 0 20px #ff0066,
+        0 0 40px #cc0055,
+        0 0 80px #880033;
+    }
+  }
+
+  /* ПОДПИСЬ */
+  #subtitle {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #888;
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-align: center;
+    z-index: 20;
+    opacity: 0;
+    animation: fadeIn 2s ease-in 1s forwards;
+    white-space: pre-line;
+    line-height: 2;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* ПУЗЫРИ */
+  .bubble {
+    position: absolute;
+    bottom: 0;
+    width: 12px;
+    height: 12px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    z-index: 8;
+    animation: bubbleUp 4s linear infinite;
+  }
+
+  @keyframes bubbleUp {
+    0%   { bottom: 0; opacity: 0; }
+    10%  { opacity: 0.8; }
+    100% { bottom: 100%; opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div id="vignette"></div>
+<div id="scanlines"></div>
+
+<div id="title">СЬЮЗИ</div>
+
+<div id="scene">
+  <div id="cup">
+    <div id="liquid"></div>
+    <img id="susie" src="susie.gif" alt="">
+
+    <div class="bubble" style="left: 20%; animation-delay: 0s;"></div>
+    <div class="bubble" style="left: 40%; animation-delay: 1.5s;"></div>
+    <div class="bubble" style="left: 60%; animation-delay: 0.8s;"></div>
+    <div class="bubble" style="left: 80%; animation-delay: 2.3s;"></div>
+  </div>
+</div>
+
+<div id="subtitle">она крутится.
+она всегда крутится.
+
+в чашке.</div>
+
+<script>
+console.log('%cСЬЮЗИ', 'color: #ff0066; font-size: 20px; font-weight: bold; letter-spacing: 4px;');
+console.log('%cона крутится.', 'color: #888; font-size: 12px;');
+console.log('%cв чашке.', 'color: #ff0066; font-size: 12px;');
+</script>
+
+</body>
+</html>

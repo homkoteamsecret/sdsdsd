@@ -3,6 +3,8 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/kris", "destination": "/kris.html" }
+    { "source": "/kris", "destination": "/kris.html" },
+    { "source": "/susie", "destination": "/susie.html" },
+    { "source": "/roul", "destination": "/roul.html" }
   ]
 }

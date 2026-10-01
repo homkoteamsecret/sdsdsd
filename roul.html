@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>r</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+  }
+
+  #vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.95) 100%);
+  }
+
+  #scanlines {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(255,255,255,0.03) 3px,
+      rgba(255,255,255,0.03) 4px
+    );
+  }
+
+  #flicker {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+    background: rgba(255,255,255,0.02);
+    animation: flicker 4s infinite;
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 0; }
+    48% { opacity: 0; }
+    50% { opacity: 1; }
+    52% { opacity: 0; }
+    88% { opacity: 0; }
+    89% { opacity: 1; }
+    90% { opacity: 0; }
+    91% { opacity: 1; }
+    92% { opacity: 0; }
+  }
+
+  /* ROUL */
+  #roul {
+    position: relative;
+    z-index: 10;
+    width: 400px;
+    height: auto;
+    image-rendering: pixelated;
+    user-select: none;
+    -webkit-user-drag: none;
+    animation: bob 3s ease-in-out infinite;
+    filter:
+      drop-shadow(0 0 20px #00ff88)
+      drop-shadow(0 0 40px #00cc66);
+  }
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50%      { transform: translateY(-12px) rotate(2deg); }
+  }
+
+  /* НАДПИСЬ */
+  #title {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #00ff88;
+    font-size: 24px;
+    letter-spacing: 8px;
+    text-shadow:
+      0 0 10px #00ff88,
+      0 0 20px #00cc66,
+      0 0 40px #008844;
+    z-index: 20;
+    animation: titlePulse 2s ease-in-out infinite;
+  }
+
+  @keyframes titlePulse {
+    0%, 100% {
+      text-shadow:
+        0 0 10px #00ff88,
+        0 0 20px #00cc66;
+    }
+    50% {
+      text-shadow:
+        0 0 20px #00ff88,
+        0 0 40px #00cc66,
+        0 0 80px #008844;
+    }
+  }
+
+  /* ПОДПИСЬ */
+  #subtitle {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #888;
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-align: center;
+    z-index: 20;
+    opacity: 0;
+    animation: fadeIn 2s ease-in 1s forwards;
+    white-space: pre-line;
+    line-height: 2;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div id="vignette"></div>
+<div id="scanlines"></div>
+<div id="flicker"></div>
+
+<div id="title">ROUL</div>
+
+<img id="roul" src="roul.gif" alt="">
+
+<div id="subtitle">он крутится.
+он всегда крутится.
+
+roul.</div>
+
+<audio id="roulMusic" loop>
+  <source src="roul.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+// ============================================================
+//  МУЗЫКА
+// ============================================================
+const music = document.getElementById('roulMusic');
+music.volume = 0;
+
+function playMusic() {
+  music.play().then(() => {
+    let vol = 0;
+    const fade = setInterval(() => {
+      vol += 0.02;
+      if (vol >= 0.4) { vol = 0.4; clearInterval(fade); }
+      music.volume = vol;
+    }, 100);
+  }).catch(() => {});
+}
+
+playMusic();
+document.addEventListener('click', playMusic, { once: true });
+document.addEventListener('keydown', playMusic, { once: true });
+
+// ============================================================
+//  КОНСОЛЬ
+// ============================================================
+console.log('%cROULXLS', 'color: #00ff88; font-size: 20px; font-weight: bold; letter-spacing: 4px;');
+console.log('%cон крутится.', 'color: #888; font-size: 12px;');
+console.log('%croul.mp3 играет.', 'color: #00ff88; font-size: 12px;');
+</script>
+
+</body>
+</html>
