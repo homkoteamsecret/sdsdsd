@@ -2,7 +2,6 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>...</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,228 +11,131 @@
     height: 100%;
     background: #000;
     overflow: hidden;
-    cursor: none;
-    font-family: 'Courier New', monospace;
-  }
-
-  /* GIF на весь экран */
-  #friend {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100vmin;
-    height: 100vmin;
-    object-fit: contain;
-    opacity: 0;
-    animation: appear 3s ease-in forwards, pulse 2s ease-in-out 3s infinite;
-    z-index: 10;
-    image-rendering: pixelated;
-    filter: contrast(1.3) brightness(0.85);
-  }
-
-  @keyframes appear {
-    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-    50%  { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
-    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  }
-
-  @keyframes pulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-    50%      { transform: translate(-50%, -50%) scale(1.04); }
-  }
-
-  /* Тряска */
-  .shake { animation: shake 0.12s infinite; }
-
-  @keyframes shake {
-    0%   { transform: translate(0, 0); }
-    25%  { transform: translate(-4px, 3px); }
-    50%  { transform: translate(4px, -3px); }
-    75%  { transform: translate(-3px, -4px); }
-    100% { transform: translate(3px, 4px); }
-  }
-
-  /* Красная вспышка */
-  #flash {
-    position: fixed;
-    inset: 0;
-    background: #ff0000;
-    opacity: 0;
-    z-index: 30;
-    pointer-events: none;
-    animation: flash 8s ease-in forwards;
-  }
-
-  @keyframes flash {
-    0%   { opacity: 0; }
-    8%   { opacity: 0.8; }
-    15%  { opacity: 0; }
-    35%  { opacity: 0.6; }
-    45%  { opacity: 0; }
-    65%  { opacity: 0.4; }
-    75%  { opacity: 0; }
-    100% { opacity: 0; }
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
   }
 
   /* Виньетка */
   #vignette {
     position: fixed;
     inset: 0;
-    background: radial-gradient(circle at center, transparent 15%, #000 85%);
-    z-index: 15;
     pointer-events: none;
-    animation: vignetteClose 12s ease-in forwards;
+    z-index: 2;
+    background: radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.95) 100%);
   }
 
-  @keyframes vignetteClose {
-    from { background: radial-gradient(circle at center, transparent 15%, #000 85%); }
-    to   { background: radial-gradient(circle at center, transparent 0%, #000 60%); }
-  }
-
-  /* Глаза по углам */
-  .eye {
-    position: fixed;
-    width: 40px;
-    height: 40px;
-    background: radial-gradient(circle, #ff0000 30%, #8b0000 60%, transparent 70%);
-    border-radius: 50%;
-    opacity: 0;
-    animation: eyeAppear 1s ease-in 5s forwards, eyePulse 1.5s ease-in-out infinite 6s;
-    z-index: 25;
-    pointer-events: none;
-  }
-
-  .eye.tl { top: 5%; left: 5%; }
-  .eye.tr { top: 5%; right: 5%; }
-  .eye.bl { bottom: 5%; left: 5%; }
-  .eye.br { bottom: 5%; right: 5%; }
-
-  @keyframes eyeAppear {
-    from { opacity: 0; transform: scale(0); }
-    to   { opacity: 0.9; transform: scale(1); }
-  }
-
-  @keyframes eyePulse {
-    0%, 100% { transform: scale(1); opacity: 0.9; }
-    50%      { transform: scale(1.4); opacity: 0.3; }
-  }
-
-  /* Экран "нажми" — если звук заблокирован */
-  #tap {
+  /* Сканлайны */
+  #scanlines {
     position: fixed;
     inset: 0;
-    background: #000;
-    color: #8b0000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    letter-spacing: 4px;
-    z-index: 100;
-    cursor: pointer;
-    text-shadow: 0 0 10px #ff0000;
-    animation: flicker 0.15s infinite;
+    pointer-events: none;
+    z-index: 3;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(255,255,255,0.03) 3px,
+      rgba(255,255,255,0.03) 4px
+    );
   }
 
-  #tap.hidden { display: none; }
+  /* Мерцание */
+  #flicker {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+    background: rgba(255,255,255,0.02);
+    animation: flicker 5s infinite;
+  }
 
   @keyframes flicker {
-    0%, 100% { opacity: 1; }
-    50%      { opacity: 0.3; }
-    92%      { opacity: 0.05; }
+    0%, 100% { opacity: 0; }
+    48% { opacity: 0; }
+    50% { opacity: 1; }
+    52% { opacity: 0; }
+    88% { opacity: 0; }
+    89% { opacity: 1; }
+    90% { opacity: 0; }
+    91% { opacity: 1; }
+    92% { opacity: 0; }
+  }
+
+  /* Гастер */
+  #gaster {
+    position: relative;
+    z-index: 10;
+    width: 300px;
+    height: auto;
+    image-rendering: pixelated;
+    opacity: 0.9;
+    user-select: none;
+    -webkit-user-drag: none;
+    animation: breathe 6s ease-in-out infinite, pulse 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px #fff) drop-shadow(0 0 40px #888);
+  }
+
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50%      { transform: scale(1.03); opacity: 1; }
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      filter: drop-shadow(0 0 20px #fff) drop-shadow(0 0 40px #888);
+    }
+    50% {
+      filter: drop-shadow(0 0 40px #fff) drop-shadow(0 0 80px #888);
+    }
   }
 </style>
 </head>
 <body>
 
-  <!-- Экран "нажми" -->
-  <div id="tap">нажми</div>
+<div id="vignette"></div>
+<div id="scanlines"></div>
+<div id="flicker"></div>
 
-  <!-- Визуал -->
-  <div id="flash"></div>
-  <img id="friend" src="friend.gif" alt="">
-  <div id="vignette"></div>
+<img id="gaster" src="gaster.png" alt="">
 
-  <!-- Глаза -->
-  <div class="eye tl"></div>
-  <div class="eye tr"></div>
-  <div class="eye bl"></div>
-  <div class="eye br"></div>
-
-  <!-- Звук -->
-  <audio id="growl" src="friend.mp3" loop preload="auto"></audio>
+<audio id="gasterMusic" loop>
+  <source src="gaster.mp3" type="audio/mpeg">
+</audio>
 
 <script>
-  localStorage.setItem('friend_summoned', 'true');
-  localStorage.setItem('ending', 'bad');
+// ============================================================
+//  МУЗЫКА — запуск при первом клике
+// ============================================================
+const music = document.getElementById('gasterMusic');
+music.volume = 0;
 
-  const growl = document.getElementById('growl');
-  const tap = document.getElementById('tap');
+function playMusic() {
+  music.play().then(() => {
+    let vol = 0;
+    const fade = setInterval(() => {
+      vol += 0.02;
+      if (vol >= 0.4) { vol = 0.4; clearInterval(fade); }
+      music.volume = vol;
+    }, 100);
+  }).catch(() => {});
+}
 
-  // === Попытка запустить звук сразу ===
-  growl.volume = 0.8;
-  const playPromise = growl.play();
+// пробуем сразу
+playMusic();
 
-  if (playPromise !== undefined) {
-    playPromise
-      .then(() => {
-        tap.classList.add('hidden');
-        startShow();
-      })
-      .catch(() => {
-        // Заблокировано — ждём клика
-        tap.addEventListener('click', () => {
-          growl.play();
-          tap.classList.add('hidden');
-          startShow();
-        }, { once: true });
-      });
-  } else {
-    tap.addEventListener('click', () => {
-      growl.play();
-      tap.classList.add('hidden');
-      startShow();
-    }, { once: true });
-  }
+// если заблокировано — при первом клике
+document.addEventListener('click', playMusic, { once: true });
+document.addEventListener('keydown', playMusic, { once: true });
 
-  // === Основное шоу ===
-  function startShow() {
-    // Тряска через 2 сек
-    setTimeout(() => {
-      document.body.classList.add('shake');
-    }, 2000);
-
-    // Усиление звука через 9 сек
-    setTimeout(() => {
-      growl.volume = 1;
-      growl.playbackRate = 0.7;
-    }, 9000);
-
-    // Падение через 12 сек
-    setTimeout(() => {
-      document.body.style.background = '#ff0000';
-      setTimeout(() => {
-        window.location.href = 'about:blank';
-      }, 1500);
-    }, 12000);
-  }
-
-  // === Запрет ухода ===
-  window.addEventListener('beforeunload', (e) => {
-    e.preventDefault();
-    e.returnValue = '';
-  });
-
-  // === Клик = падение ===
-  document.addEventListener('click', (e) => {
-    if (e.target.id === 'tap') return;
-    window.location.href = 'about:blank';
-  });
-
-  document.addEventListener('keydown', () => {
-    window.location.href = 'about:blank';
-  });
+// ============================================================
+//  КОНСОЛЬ
+// ============================================================
+console.log('%c...', 'color: #333; font-size: 20px;');
+console.log('%cон был первым.', 'color: #888; font-size: 14px;');
+console.log('%cон стёрт.', 'color: #888; font-size: 14px;');
+console.log('%cно он везде.', 'color: #fff; font-size: 14px; text-shadow: 0 0 10px #fff;');
 </script>
 
 </body>
