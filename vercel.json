@@ -5,6 +5,10 @@
   "rewrites": [
     { "source": "/kris", "destination": "/kris.html" },
     { "source": "/susie", "destination": "/susie.html" },
-    { "source": "/roul", "destination": "/roul.html" }
+    { "source": "/r", "destination": "/roul.html" },
+    { "source": "/roul", "destination": "/roul.html" },
+    { "source": "/rulscaard", "destination": "/roul.html" },
+    { "source": "/malina", "destination": "/malina.html" },
+    { "source": "/malina/end", "destination": "/malina-end.html" }
   ]
 }

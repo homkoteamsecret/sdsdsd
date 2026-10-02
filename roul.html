@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>r</title>
+<title>Рулс Каард</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -35,8 +35,8 @@
       to bottom,
       transparent 0px,
       transparent 2px,
-      rgba(255,255,255,0.03) 3px,
-      rgba(255,255,255,0.03) 4px
+      rgba(0,255,136,0.03) 3px,
+      rgba(0,255,136,0.03) 4px
     );
   }
 
@@ -45,7 +45,7 @@
     inset: 0;
     pointer-events: none;
     z-index: 4;
-    background: rgba(255,255,255,0.02);
+    background: rgba(0,255,136,0.02);
     animation: flicker 4s infinite;
   }
 
@@ -61,7 +61,6 @@
     92% { opacity: 0; }
   }
 
-  /* ROUL */
   #roul {
     position: relative;
     z-index: 10;
@@ -81,7 +80,6 @@
     50%      { transform: translateY(-12px) rotate(2deg); }
   }
 
-  /* НАДПИСЬ */
   #title {
     position: fixed;
     top: 30px;
@@ -112,7 +110,6 @@
     }
   }
 
-  /* ПОДПИСЬ */
   #subtitle {
     position: fixed;
     bottom: 40px;
@@ -141,23 +138,20 @@
 <div id="scanlines"></div>
 <div id="flicker"></div>
 
-<div id="title">ROUL</div>
+<div id="title">РУЛС КААРД</div>
 
 <img id="roul" src="roul.gif" alt="">
 
 <div id="subtitle">он крутится.
 он всегда крутится.
 
-roul.</div>
+рулс каард.</div>
 
 <audio id="roulMusic" loop>
   <source src="roul.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-// ============================================================
-//  МУЗЫКА
-// ============================================================
 const music = document.getElementById('roulMusic');
 music.volume = 0;
 
@@ -176,12 +170,9 @@ playMusic();
 document.addEventListener('click', playMusic, { once: true });
 document.addEventListener('keydown', playMusic, { once: true });
 
-// ============================================================
-//  КОНСОЛЬ
-// ============================================================
-console.log('%cROULXLS', 'color: #00ff88; font-size: 20px; font-weight: bold; letter-spacing: 4px;');
+console.log('%cРУЛС КААРД', 'color: #00ff88; font-size: 20px; font-weight: bold; letter-spacing: 4px;');
 console.log('%cон крутится.', 'color: #888; font-size: 12px;');
-console.log('%croul.mp3 играет.', 'color: #00ff88; font-size: 12px;');
+console.log('%cрулс каард.mp3 играет.', 'color: #00ff88; font-size: 12px;');
 </script>
 
 </body>
