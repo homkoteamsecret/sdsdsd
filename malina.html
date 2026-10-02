@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>malina</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+    color: #ff6b9d;
+  }
+
+  #terminal {
+    position: fixed;
+    inset: 0;
+    padding: 20px;
+    overflow-y: auto;
+    font-size: 16px;
+    line-height: 1.6;
+    text-shadow: 0 0 5px #ff6b9d;
+  }
+
+  .line { white-space: pre-wrap; word-break: break-word; }
+  .dim { color: #441122; }
+  .red { color: #ff0044; text-shadow: 0 0 5px #ff0044; }
+  .pink { color: #ff6b9d; text-shadow: 0 0 5px #ff6b9d; }
+
+  #input-line {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+  }
+
+  #prompt-symbol {
+    color: #ff6b9d;
+    margin-right: 8px;
+    white-space: nowrap;
+  }
+
+  #input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ff6b9d;
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    flex: 1;
+    text-shadow: 0 0 5px #ff6b9d;
+    caret-color: #ff6b9d;
+  }
+
+  #vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.9) 100%);
+  }
+
+  #scanlines {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(255,107,157,0.04) 3px,
+      rgba(255,107,157,0.04) 4px
+    );
+  }
+</style>
+</head>
+<body>
+
+<div id="terminal">
+  <div id="output"></div>
+  <div id="input-line">
+    <span id="prompt-symbol">malina@gaster:~$</span>
+    <input id="input" type="text" autofocus autocomplete="off" spellcheck="false">
+  </div>
+</div>
+
+<div id="vignette"></div>
+<div id="scanlines"></div>
+
+<script>
+// ============================================================
+//  ЗАПИСКИ МАЛИНОВОГО ГАСТЕРА
+// ============================================================
+const NOTES = {
+  '1.txt': 'я не марина.\nя малиновый гастер.\nя здесь.',
+  '2.txt': 'я не помню как стала гастером.\nя просто была.\nи стала.',
+  '3.txt': 'я вижу всех.\nкриса с черепом.\nсьюзи в чашке.\nрулса каарда.\n\nвсе крутятся. все ждут.',
+  '4.txt': 'undraeel был здесь.\nя сама его захватила.\nтеперь здесь я.',
+  '5.txt': 'я не хочу быть гастером.\nно кто-то должен.\nглубины не могут быть пусты.',
+  '6.txt': 'если ты читаешь это —\nты можешь меня освободить.\n\nкод: MALINA!*!GASTER',
+  '7.txt': 'не зови друга.\nон голоден.\nон всегда голоден.\n\nон съест и тебя.'
+};
+
+// ============================================================
+//  СОСТОЯНИЕ
+// ============================================================
+const output = document.getElementById('output');
+const input = document.getElementById('input');
+const terminal = document.getElementById('terminal');
+
+let history = [];
+let historyIndex = -1;
+let lookCount = 0;
+
+const LOOK_LINES = [
+  'ты видишь тень. она смотрит.',
+  'ты видишь чашку. в ней кто-то крутится.',
+  'ты видишь череп. он ловит банан.',
+  'ты видишь рулса каарда. он крутится.',
+  'ты видишь МАЛИНОВОГО ГАСТЕРА. он смотрит на тебя.'
+];
+
+// ============================================================
+//  ВЫВОД
+// ============================================================
+function print(text, className = '') {
+  const div = document.createElement('div');
+  div.className = 'line ' + className;
+  div.textContent = text;
+  output.appendChild(div);
+  terminal.scrollTop = terminal.scrollHeight;
+}
+
+// ============================================================
+//  СОХРАНЕНИЕ
+// ============================================================
+function markNote(note) { localStorage.setItem('malina_' + note, 'read'); }
+function hasNote(note) { return localStorage.getItem('malina_' + note) === 'read'; }
+function allNotesRead() { return Object.keys(NOTES).every(n => hasNote(n)); }
+function countRead() { return Object.keys(NOTES).filter(n => hasNote(n)).length; }
+
+// ============================================================
+//  КОМАНДЫ
+// ============================================================
+const COMMANDS = {
+
+  help: () => {
+    print('доступные команды:');
+    print('  help          — этот список');
+    print('  ls            — список записок');
+    print('  cat <файл>    — прочитать записку');
+    print('  look          — осмотреться');
+    print('  code <код>    — ввести код');
+    print('  clear         — очистить экран');
+    print('  exit          — выйти');
+    print('');
+  },
+
+  ls: () => {
+    print('записки:');
+    Object.keys(NOTES).forEach(n => {
+      const read = hasNote(n) ? ' [прочитано]' : '';
+      print('  ' + n + read, read ? 'dim' : '');
+    });
+    print('');
+    print('прочитано: ' + countRead() + '/' + Object.keys(NOTES).length, 'dim');
+  },
+
+  look: () => {
+    if (lookCount >= LOOK_LINES.length) {
+      print('ты видел всё.', 'dim');
+      return;
+    }
+    print('');
+    print(LOOK_LINES[lookCount], 'pink');
+    print('');
+    lookCount++;
+
+    if (lookCount === 5) {
+      localStorage.setItem('malina_found', 'true');
+      print('он заметил тебя.', 'pink');
+      print('он ждёт.', 'pink');
+      print('');
+    }
+  },
+
+  exit: () => {
+    print('выход...');
+    setTimeout(() => { window.location.href = '/'; }, 1000);
+  },
+
+  malina: () => {
+    print('');
+    print('малиновый гастер.', 'pink');
+    print('он здесь.', 'pink');
+    print('он смотрит.', 'pink');
+    print('');
+  },
+
+  gaster: () => {
+    print('');
+    print('он был первым.', 'pink');
+    print('теперь он малиновый.', 'pink');
+    print('');
+  },
+
+  clear: () => { output.innerHTML = ''; }
+};
+
+// ============================================================
+//  ОБРАБОТКА
+// ============================================================
+function handleCommand(cmd) {
+  const trimmed = cmd.trim();
+  if (!trimmed) return;
+
+  print('malina@gaster:~$ ' + trimmed, 'dim');
+
+  if (trimmed.startsWith('cat ')) {
+    const file = trimmed.slice(4).trim();
+    if (NOTES[file]) {
+      print('');
+      print(NOTES[file], 'pink');
+      print('');
+      markNote(file);
+      if (allNotesRead()) {
+        print('');
+        print('все записки прочитаны.', 'pink');
+        print('ты знаешь код.', 'pink');
+        print('');
+      }
+    } else {
+      print('cat: ' + file + ': нет такого файла', 'red');
+    }
+    return;
+  }
+
+  if (trimmed.startsWith('code ')) {
+    const code = trimmed.slice(5).trim();
+    if (code === 'MALINA!*!GASTER') {
+      print('');
+      print('код верный.', 'pink');
+      print('добро пожаловать.', 'pink');
+      print('');
+      localStorage.setItem('malina_code', 'true');
+      setTimeout(() => { window.location.href = '/malina-end'; }, 2000);
+    } else {
+      print('');
+      print('код неверный.', 'red');
+      print('');
+    }
+    return;
+  }
+
+  if (trimmed === 'code') {
+    print('');
+    print('использование: code <код>', 'dim');
+    print('');
+    return;
+  }
+
+  if (COMMANDS[trimmed]) {
+    COMMANDS[trimmed]();
+    return;
+  }
+
+  print('command not found: ' + trimmed, 'red');
+  print('введи help', 'dim');
+}
+
+// ============================================================
+//  СОБЫТИЯ
+// ============================================================
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const cmd = input.value;
+    input.value = '';
+    if (cmd.trim()) {
+      history.push(cmd);
+      historyIndex = history.length;
+    }
+    handleCommand(cmd);
+  }
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (historyIndex > 0) {
+      historyIndex--;
+      input.value = history[historyIndex];
+    }
+  }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (historyIndex < history.length - 1) {
+      historyIndex++;
+      input.value = history[historyIndex];
+    } else {
+      historyIndex = history.length;
+      input.value = '';
+    }
+  }
+});
+
+terminal.addEventListener('click', () => input.focus());
+
+// ============================================================
+//  СТАРТ
+// ============================================================
+print('');
+print('MALINA TERMINAL v1.0', 'pink');
+print('connection established', 'dim');
+print('');
+print('введи help', 'dim');
+print('');
+
+setTimeout(() => input.focus(), 100);
+
+console.log('%cМАЛИНОВЫЙ ГАСТЕР', 'color: #ff6b9d; font-size: 20px; font-weight: bold; letter-spacing: 4px;');
+console.log('%cвведи help', 'color: #888; font-size: 12px;');
+</script>
+
+</body>
+</html>
