@@ -10,17 +10,42 @@
     height: 100%;
     background: #000;
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     font-family: monospace;
   }
+
+  /* видео на весь экран */
   video {
     width: 100vw;
     height: 100vh;
     object-fit: cover;
+    display: block;
     background: #000;
   }
+
+  /* подсказка «нажми» — видна пока видео на паузе */
+  .tap-hint {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffd93b;
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.55);
+    animation: blink 2s ease-in-out infinite;
+    z-index: 10;
+    user-select: none;
+  }
+  .tap-hint.hidden { display: none; }
+
+  @keyframes blink {
+    0%, 100% { opacity: 0.5; }
+    50%      { opacity: 1; }
+  }
+
   .whisper {
     position: fixed;
     color: #3a2e0a;
@@ -30,6 +55,7 @@
     user-select: none;
     opacity: 0;
     animation: whisper 8s infinite;
+    z-index: 5;
   }
   @keyframes whisper {
     0%, 90% { opacity: 0; }
@@ -43,15 +69,9 @@
 </head>
 <body>
 
-  <video
-    id="v"
-    src="v.mp4"
-    autoplay
-    muted
-    playsinline
-    loop
-    preload="auto"
-  ></video>
+  <video id="v" src="/v.mp4" playsinline loop preload="auto"></video>
+
+  <div class="tap-hint" id="hint">нажми</div>
 
   <div class="whisper w1">я ждала</div>
   <div class="whisper w2">6.5 метров</div>
@@ -59,23 +79,32 @@
 
 <script>
   const v = document.getElementById('v');
+  const hint = document.getElementById('hint');
 
-  // Автоплей без звука разрешён всегда.
-  // Звук включаем по первому клику/тапу/клавише.
-  function enableSound() {
-    v.muted = false;
+  // показываем первый кадр, но не играем
+  v.addEventListener('loadeddata', () => {
+    v.pause();
+  });
+
+  function start() {
+    hint.classList.add('hidden');
+    v.muted = false;       // звук включаем
     v.volume = 1;
-    v.play().catch(() => {});
-    window.removeEventListener('click', enableSound);
-    window.removeEventListener('touchstart', enableSound);
-    window.removeEventListener('keydown', enableSound);
+    v.play().catch(err => {
+      console.warn('play failed:', err);
+      // если браузер всё равно не дал — пробуем с muted
+      v.muted = true;
+      v.play().catch(() => {});
+    });
   }
-  window.addEventListener('click', enableSound);
-  window.addEventListener('touchstart', enableSound);
-  window.addEventListener('keydown', enableSound);
 
-  // страховка, если autoplay не сработал
-  v.play().catch(() => {});
+  // клик в любом месте страницы запускает видео
+  document.addEventListener('click', start, { once: true });
+  document.addEventListener('touchstart', start, { once: true });
+  document.addEventListener('keydown', start, { once: true });
+
+  // подсказка тоже кликабельна
+  hint.addEventListener('click', start);
 </script>
 </body>
 </html>
