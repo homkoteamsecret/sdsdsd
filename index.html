@@ -52,8 +52,16 @@
 <script>
   const v = document.getElementById('v');
   const snd = document.getElementById('snd');
+
+  let clicks = 0;
+
   v.addEventListener('click', () => {
     try { snd.currentTime = 0; snd.play(); } catch(e) {}
+
+    clicks++;
+    if (clicks >= 5) {
+      window.location.href = '/heyitsme';
+    }
   });
 </script>
 </body>

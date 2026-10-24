@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>hey, it's me</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: monospace;
+  }
+  video {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    background: #000;
+  }
+  .whisper {
+    position: fixed;
+    color: #3a2e0a;
+    font-size: 11px;
+    letter-spacing: 2px;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+    animation: whisper 8s infinite;
+  }
+  @keyframes whisper {
+    0%, 90% { opacity: 0; }
+    95%     { opacity: 1; }
+    100%    { opacity: 0; }
+  }
+  .w1 { top: 15%; left: 8%;  animation-delay: 0s; }
+  .w2 { top: 75%; right: 10%; animation-delay: 3s; }
+  .w3 { bottom: 12%; left: 18%; animation-delay: 6s; }
+</style>
+</head>
+<body>
+
+  <video
+    id="v"
+    src="v.mp4"
+    autoplay
+    muted
+    playsinline
+    loop
+    preload="auto"
+  ></video>
+
+  <div class="whisper w1">я ждала</div>
+  <div class="whisper w2">6.5 метров</div>
+  <div class="whisper w3">человеческие зубы</div>
+
+<script>
+  const v = document.getElementById('v');
+
+  // Автоплей без звука разрешён всегда.
+  // Звук включаем по первому клику/тапу/клавише.
+  function enableSound() {
+    v.muted = false;
+    v.volume = 1;
+    v.play().catch(() => {});
+    window.removeEventListener('click', enableSound);
+    window.removeEventListener('touchstart', enableSound);
+    window.removeEventListener('keydown', enableSound);
+  }
+  window.addEventListener('click', enableSound);
+  window.addEventListener('touchstart', enableSound);
+  window.addEventListener('keydown', enableSound);
+
+  // страховка, если autoplay не сработал
+  v.play().catch(() => {});
+</script>
+</body>
+</html>
