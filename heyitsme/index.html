@@ -13,7 +13,6 @@
     font-family: monospace;
   }
 
-  /* видео на весь экран */
   video {
     width: 100vw;
     height: 100vh;
@@ -22,7 +21,6 @@
     background: #000;
   }
 
-  /* подсказка «нажми» — видна пока видео на паузе */
   .tap-hint {
     position: fixed;
     inset: 0;
@@ -69,7 +67,8 @@
 </head>
 <body>
 
-  <video id="v" src="/v.mp4" playsinline loop preload="auto"></video>
+  <!-- ВАЖНО: путь относительный, видео лежит рядом с этим файлом -->
+  <video id="v" src="v.mp4" playsinline loop preload="auto"></video>
 
   <div class="tap-hint" id="hint">нажми</div>
 
@@ -81,29 +80,28 @@
   const v = document.getElementById('v');
   const hint = document.getElementById('hint');
 
-  // показываем первый кадр, но не играем
-  v.addEventListener('loadeddata', () => {
-    v.pause();
+  // первый кадр показать, но не играть
+  v.addEventListener('loadeddata', () => v.pause());
+
+  v.addEventListener('error', () => {
+    console.error('VIDEO ERROR:', v.error);
   });
 
   function start() {
     hint.classList.add('hidden');
-    v.muted = false;       // звук включаем
+    v.muted = false;
     v.volume = 1;
     v.play().catch(err => {
       console.warn('play failed:', err);
-      // если браузер всё равно не дал — пробуем с muted
+      // если звук заблокирован — играем без звука
       v.muted = true;
-      v.play().catch(() => {});
+      v.play().catch(e => console.error('still failed:', e));
     });
   }
 
-  // клик в любом месте страницы запускает видео
   document.addEventListener('click', start, { once: true });
   document.addEventListener('touchstart', start, { once: true });
   document.addEventListener('keydown', start, { once: true });
-
-  // подсказка тоже кликабельна
   hint.addEventListener('click', start);
 </script>
 </body>
