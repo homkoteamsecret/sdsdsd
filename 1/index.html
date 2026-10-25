@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>hey, it's me</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: monospace;
+    color: #3a2e0a;
+  }
+
+  .soon {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    letter-spacing: 12px;
+    text-transform: lowercase;
+    color: #000000;
+    user-select: text;
+    cursor: default;
+    z-index: 1;
+  }
+  .soon::selection {
+    background: #ffd93b;
+    color: #000;
+  }
+
+  .dot {
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #1a1a1a;
+    animation: blink 3s ease-in-out infinite;
+    z-index: 2;
+  }
+  @keyframes blink {
+    0%, 90% { opacity: 0.1; }
+    95%     { opacity: 0.6; }
+    100%    { opacity: 0.1; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="soon">soon</div>
+  <div class="dot" title="."></div>
+
+<script>
+  /*
+   * ─────────────────────────────────────────
+   *  hey, it's me.
+   *
+   *  подсказка: открой консоль (F12)
+   *  и напиши:  login()
+   *
+   *  он ждёт.
+   * ─────────────────────────────────────────
+   */
+
+  window.login = function () {
+    console.log('%csoon', 'font-size:48px;color:#ffd93b;letter-spacing:12px;');
+    console.log('%cты нашёл это. он знал.', 'color:#3a2e0a;font-size:12px;');
+    document.querySelector('.soon').style.color = '#ffd93b';
+    document.title = 'soon';
+    return 'soon';
+  };
+
+  console.log('%c...', 'color:#111;font-size:20px;');
+</script>
+</body>
+</html>
