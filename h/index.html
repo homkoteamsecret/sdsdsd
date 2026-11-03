@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>скрыто · soon</title>
+  <style>
+    /* базовый сброс */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #000000;        /* абсолютно чёрный фон */
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      /* чтобы чёрный был действительно чёрным даже на тёмных темах */
+      color-scheme: dark;
+    }
+
+    /* центральный блок, содержащий надпись */
+    .hidden-message {
+      /* размеры не фиксируем — пусть подстраивается */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* отступы, чтобы удобно было наводить на мобильных */
+      padding: 2rem;
+      cursor: default;           /* обычный курсор, никаких подсказок */
+      user-select: none;         /* текст нельзя выделить — он «скрыт» */
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.2s ease;
+    }
+
+    /* сама надпись */
+    .soon-text {
+      font-size: clamp(3rem, 15vw, 7rem);
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: lowercase;   /* «soon» строчными — так задумано */
+      color: #000000;             /* чёрный на чёрном — полностью невидим */
+      text-shadow: none;
+      transition: color 0.4s cubic-bezier(0.2, 0.9, 0.4, 1), text-shadow 0.3s ease;
+      /* небольшая задержка не нужна — плавность уже задана */
+    }
+
+    /* при наведении (и на телефонах при касании) надпись «проявляется» */
+    .hidden-message:hover .soon-text,
+    .hidden-message:active .soon-text {
+      color: #ffffff;            /* белый — резкий контраст */
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.6); /* лёгкое свечение, чтобы точно заметили */
+    }
+
+    /* Для устройств, где нет hover (тач), но хотим, чтобы эффект был при касании.
+       Используем :active — он срабатывает при касании/клике. 
+       Но чтобы после касания надпись не оставалась белой навсегда, 
+       можно добавить сброс через :not(:active) — но это не обязательно.
+       Главное — при наведении мышью работает, на телефоне — при касании. */
+
+    /* Дополнительно: если хочется, чтобы на тач-устройствах надпись 
+       исчезала после отпускания пальца, :active уже даёт такой эффект. 
+       Но если палец остаётся на экране — надпись видна, это нормально. */
+
+    /* Делаем так, чтобы даже при выделении/тапе не появлялось синее выделение */
+    .soon-text::selection {
+      background: transparent;
+      color: #000000;
+    }
+
+    /* Кнопка/ссылка не нужна — это просто текст, скрытый до поры */
+  </style>
+</head>
+<body>
+  <!-- 
+    Контейнер для наведения.
+    Надпись «soon» полностью сливается с чёрным фоном,
+    пока пользователь не наведёт курсор или не коснётся экрана.
+  -->
+  <div class="hidden-message">
+    <span class="soon-text">soon</span>
+  </div>
+</body>
+</html>
