@@ -2,33 +2,47 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>связь</title>
+<title>...</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
+  html, body {
+    width: 100%; height: 100%;
     background: #000;
-    color: #fff;
+    overflow: hidden;
+    cursor: default;
     font-family: 'Courier New', monospace;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    flex-direction: column;
-    cursor: default;
-    overflow: hidden;
-    position: relative;
   }
 
+  /* --- Фон pr.gif — уменьшен и по центру --- */
+  #bg-gif {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 55vw;         /* ← размер гифки: 55% ширины экрана */
+    height: 55vh;        /* ← размер по высоте */
+    max-width: 640px;    /* ← не больше 640px по ширине */
+    max-height: 640px;   /* ← не больше 640px по высоте */
+    object-fit: contain;
+    z-index: 0;
+    filter: contrast(1.1) brightness(0.85) saturate(1.1);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* --- Мерцание --- */
   body::before {
     content: '';
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(255,255,255,0.015);
+    background: rgba(255,255,255,0.02);
     pointer-events: none;
     animation: flicker 5s infinite;
-    z-index: 1;
+    z-index: 2;
   }
 
   @keyframes flicker {
@@ -43,6 +57,7 @@
     92% { opacity: 0; }
   }
 
+  /* --- Скан-линии --- */
   body::after {
     content: '';
     position: fixed;
@@ -52,11 +67,11 @@
       to bottom,
       transparent 0px,
       transparent 2px,
-      rgba(255,255,255,0.015) 3px,
-      rgba(255,255,255,0.015) 4px
+      rgba(255,255,255,0.02) 3px,
+      rgba(255,255,255,0.02) 4px
     );
     pointer-events: none;
-    z-index: 2;
+    z-index: 3;
     animation: scanMove 8s linear infinite;
   }
 
@@ -65,40 +80,53 @@
     100% { transform: translateY(4px); }
   }
 
+  /* --- Цветной шум --- */
   #bg-noise {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
     pointer-events: none;
-    z-index: 0;
-    opacity: 0.06;
+    z-index: 1;
+    opacity: 0.05;
     mix-blend-mode: screen;
-    background: linear-gradient(90deg, #ff0044 0%, transparent 20%, transparent 80%, #00ffff 100%);
+    background: linear-gradient(
+      90deg,
+      #ff0044 0%,
+      transparent 20%,
+      transparent 80%,
+      #00ffff 100%
+    );
     animation: bgShift 6s ease-in-out infinite;
   }
 
   @keyframes bgShift {
     0%, 100% { transform: translateX(-10%); opacity: 0.04; }
-    50% { transform: translateX(10%); opacity: 0.09; }
+    50% { transform: translateX(10%); opacity: 0.08; }
   }
 
+  /* --- Виньетка --- */
   #vignette {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
     pointer-events: none;
-    z-index: 3;
-    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+    z-index: 4;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 35%,
+      rgba(0,0,0,0.75) 100%
+    );
   }
 
+  /* --- Скан-бар --- */
   #scan-bar {
     position: fixed;
     left: 0;
     width: 100%;
     height: 2px;
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.06);
     pointer-events: none;
-    z-index: 4;
+    z-index: 5;
     animation: scanBar 7s linear infinite;
   }
 
@@ -109,105 +137,176 @@
     100% { top: 105%; opacity: 0; }
   }
 
-  #container {
-    text-align: center;
-    position: relative;
-    z-index: 10;
-  }
-
-  #visual-entity {
-    width: 180px;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-    image-rendering: pixelated;
-    filter: grayscale(1) contrast(1.2);
-    opacity: 0.7;
-  }
-
-  #hidden-text {
-    margin-top: 30px;
-    font-size: 24px;
-    letter-spacing: 8px;
-    font-weight: bold;
-    color: #fff;
-    text-shadow: 0 0 10px #fff, 0 0 20px #ff6b9d;
-    opacity: 0;
-    transition: opacity 1.5s ease;
-  }
-
-  #hidden-text.visible {
-    opacity: 1;
-  }
-
-  #audio-control {
+  /* --- Вспышка --- */
+  #glitch-flash {
     position: fixed;
-    bottom: 15px;
-    right: 15px;
-    color: #222;
-    font-size: 11px;
-    cursor: pointer;
-    z-index: 100;
-    transition: color 0.3s;
-    user-select: none;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 6;
+    background: #fff;
+    opacity: 0;
   }
 
-  #audio-control:hover { color: #666; }
-  #audio-control.on { color: #ff6b9d; }
+  #glitch-flash.active { animation: flash 0.15s ease-out; }
+
+  @keyframes flash {
+    0% { opacity: 0.12; }
+    100% { opacity: 0; }
+  }
+
+  /* --- Скрытая кнопка в углу --- */
+  #hidden-btn {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 56px;
+    height: 56px;
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: default;
+    z-index: 100;
+    -webkit-tap-highlight-color: transparent;
+    opacity: 0;
+    appearance: none;
+  }
 </style>
 </head>
 <body>
 
+<img id="bg-gif" src="pr.gif" alt="">
+
 <div id="bg-noise"></div>
 <div id="vignette"></div>
 <div id="scan-bar"></div>
+<div id="glitch-flash"></div>
 
-<div id="container">
-  
-  <div id="hidden-text">SPAWN</div>
-</div>
+<!-- Скрытая кнопка в правом нижнем углу -->
+<button id="hidden-btn" aria-label=""></button>
 
-<div id="audio-control">♪ выкл</div>
-
-<audio id="bgMusic" loop>
-  <source src="april2012.ogg" type="audio/ogg">
+<!-- Аудио -->
+<audio id="bgMusic" loop crossorigin="anonymous">
+  <source src="pr.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-  let idleTimer;
-  const hiddenText = document.getElementById('hidden-text');
-  const audioControl = document.getElementById('audio-control');
-  const bgMusic = document.getElementById('bgMusic');
-  const imgEntity = document.getElementById('visual-entity');
+  const music = document.getElementById('bgMusic');
+  const hiddenBtn = document.getElementById('hidden-btn');
+  const glitchFlash = document.getElementById('glitch-flash');
 
-  // Обход кэша: добавляем уникальный параметр, чтобы заставить браузер сделать реальный запрос в сеть/диск
-  imgEntity.src = "he.png?v=" + new Date().getTime();
+  let audioCtx = null;
+  let gainNode = null;
+  let sourceNode = null;
+  let playing = false;
 
-  function resetIdleTimer() {
-    hiddenText.classList.remove('visible');
-    clearTimeout(idleTimer);
-    
-    idleTimer = setTimeout(() => {
-      hiddenText.classList.add('visible');
-    }, 4000);
+  function makeDistortionCurve(amount) {
+    const k = amount;
+    const n = 44100;
+    const curve = new Float32Array(n);
+    const deg = Math.PI / 180;
+    for (let i = 0; i < n; i++) {
+      const x = (i * 2) / n - 1;
+      curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+    }
+    return curve;
   }
 
-  window.addEventListener('mousemove', resetIdleTimer);
-  window.addEventListener('keydown', resetIdleTimer);
+  function initAudioChain() {
+    if (audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    sourceNode = audioCtx.createMediaElementSource(music);
 
-  audioControl.addEventListener('click', () => {
-    if (bgMusic.paused) {
-      bgMusic.play().catch(() => {});
-      audioControl.innerText = '♪ вкл';
-      audioControl.classList.add('on');
+    music.playbackRate = 0.78;
+    if ('preservesPitch' in music) music.preservesPitch = false;
+    if ('mozPreservesPitch' in music) music.mozPreservesPitch = false;
+    if ('webkitPreservesPitch' in music) music.webkitPreservesPitch = false;
+
+    const distortion = audioCtx.createWaveShaper();
+    distortion.curve = makeDistortionCurve(18);
+    distortion.oversample = '4x';
+
+    const lowpass = audioCtx.createBiquadFilter();
+    lowpass.type = 'lowpass';
+    lowpass.frequency.value = 3200;
+    lowpass.Q.value = 0.7;
+
+    const highpass = audioCtx.createBiquadFilter();
+    highpass.type = 'highpass';
+    highpass.frequency.value = 60;
+
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = 0;
+
+    sourceNode.connect(distortion);
+    distortion.connect(lowpass);
+    lowpass.connect(highpass);
+    highpass.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+  }
+
+  function fadeIn() {
+    if (!gainNode || !audioCtx) return;
+    const now = audioCtx.currentTime;
+    gainNode.gain.cancelScheduledValues(now);
+    gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+    gainNode.gain.linearRampToValueAtTime(0.55, now + 4);
+  }
+
+  function fadeOut() {
+    if (!gainNode || !audioCtx) return;
+    const now = audioCtx.currentTime;
+    gainNode.gain.cancelScheduledValues(now);
+    gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+    gainNode.gain.linearRampToValueAtTime(0, now + 1.2);
+  }
+
+  function toggleAudio() {
+    if (!audioCtx) initAudioChain();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    if (playing) {
+      fadeOut();
+      setTimeout(() => { music.pause(); }, 1200);
+      playing = false;
     } else {
-      bgMusic.pause();
-      audioControl.innerText = '♪ выкл';
-      audioControl.classList.remove('on');
+      const p = music.play();
+      if (p !== undefined) {
+        p.then(() => {
+          playing = true;
+          fadeIn();
+          triggerFlash(0.08);
+        }).catch(() => {});
+      }
     }
+  }
+
+  hiddenBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleAudio();
   });
 
-  resetIdleTimer();
+  function triggerFlash(intensity) {
+    glitchFlash.style.background = `rgba(255,255,255,${intensity})`;
+    glitchFlash.classList.remove('active');
+    void glitchFlash.offsetWidth;
+    glitchFlash.classList.add('active');
+  }
+
+  function randomGlitch() {
+    if (Math.random() < 0.5) {
+      triggerFlash(0.02 + Math.random() * 0.05);
+    }
+    const bgNoise = document.getElementById('bg-noise');
+    if (Math.random() < 0.3) {
+      bgNoise.style.opacity = (0.03 + Math.random() * 0.07).toFixed(3);
+      setTimeout(() => {
+        bgNoise.style.opacity = '0.05';
+      }, 300 + Math.random() * 500);
+    }
+    setTimeout(randomGlitch, 2000 + Math.random() * 5000);
+  }
+  randomGlitch();
 </script>
 
 </body>
