@@ -17,6 +17,7 @@
     align-items: center;
   }
 
+  /* --- pr.gif по центру, уменьшенный --- */
   #bg-gif {
     position: fixed;
     top: 50%; left: 50%;
@@ -27,96 +28,11 @@
     max-height: 640px;
     object-fit: contain;
     z-index: 0;
-    filter: contrast(1.1) brightness(0.85) saturate(1.1);
     pointer-events: none;
     user-select: none;
   }
 
-  body::before {
-    content: '';
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(255,255,255,0.02);
-    pointer-events: none;
-    animation: flicker 5s infinite;
-    z-index: 2;
-  }
-
-  @keyframes flicker {
-    0%, 100% { opacity: 0; } 48% { opacity: 0; }
-    50% { opacity: 1; } 52% { opacity: 0; }
-    88% { opacity: 0; } 89% { opacity: 1; }
-    90% { opacity: 0; } 91% { opacity: 1; } 92% { opacity: 0; }
-  }
-
-  body::after {
-    content: '';
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: repeating-linear-gradient(
-      to bottom,
-      transparent 0px, transparent 2px,
-      rgba(255,255,255,0.02) 3px, rgba(255,255,255,0.02) 4px
-    );
-    pointer-events: none;
-    z-index: 3;
-    animation: scanMove 8s linear infinite;
-  }
-
-  @keyframes scanMove {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(4px); }
-  }
-
-  #bg-noise {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none; z-index: 1;
-    opacity: 0.05; mix-blend-mode: screen;
-    background: linear-gradient(90deg, #ff0044 0%, transparent 20%, transparent 80%, #00ffff 100%);
-    animation: bgShift 6s ease-in-out infinite;
-  }
-
-  @keyframes bgShift {
-    0%, 100% { transform: translateX(-10%); opacity: 0.04; }
-    50% { transform: translateX(10%); opacity: 0.08; }
-  }
-
-  #vignette {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none; z-index: 4;
-    background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.75) 100%);
-  }
-
-  #scan-bar {
-    position: fixed; left: 0;
-    width: 100%; height: 2px;
-    background: rgba(255,255,255,0.06);
-    pointer-events: none; z-index: 5;
-    animation: scanBar 7s linear infinite;
-  }
-
-  @keyframes scanBar {
-    0% { top: -5%; opacity: 0; }
-    10% { opacity: 1; } 90% { opacity: 1; }
-    100% { top: 105%; opacity: 0; }
-  }
-
-  #glitch-flash {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none; z-index: 6;
-    background: #fff; opacity: 0;
-  }
-
-  #glitch-flash.active { animation: flash 0.15s ease-out; }
-
-  @keyframes flash {
-    0% { opacity: 0.12; }
-    100% { opacity: 0; }
-  }
-
+  /* --- Скрытая кнопка в правом нижнем углу --- */
   #hidden-btn {
     position: fixed;
     bottom: 0; right: 0;
@@ -125,9 +41,9 @@
     border: none; outline: none;
     cursor: default;
     z-index: 100;
-    -webkit-tap-highlight-color: transparent;
     opacity: 0;
     appearance: none;
+    -webkit-tap-highlight-color: transparent;
   }
 </style>
 </head>
@@ -135,148 +51,30 @@
 
 <img id="bg-gif" src="pr.gif" alt="">
 
-<div id="bg-noise"></div>
-<div id="vignette"></div>
-<div id="scan-bar"></div>
-<div id="glitch-flash"></div>
-
 <button id="hidden-btn" aria-label=""></button>
 
 <audio id="bgMusic" loop preload="auto">
-  <source src="pr.mp3" type="audio/mpeg">
+  <source src="april2012.ogg" type="audio/ogg">
 </audio>
 
 <script>
   const music = document.getElementById('bgMusic');
   const hiddenBtn = document.getElementById('hidden-btn');
-  const glitchFlash = document.getElementById('glitch-flash');
 
-  let audioCtx = null;
-  let gainNode = null;
-  let sourceNode = null;
   let playing = false;
 
-  music.addEventListener('error', () => {
-    console.error('Audio element error:', music.error);
-  });
-
-  // ==== Web Audio: замедление + дисторшн + плавный фейд ====
-  function makeDistortionCurve(amount) {
-    const k = amount;
-    const n = 44100;
-    const curve = new Float32Array(n);
-    const deg = Math.PI / 180;
-    for (let i = 0; i < n; i++) {
-      const x = (i * 2) / n - 1;
-      curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
-    }
-    return curve;
-  }
-
-  function initAudioChain() {
-    if (audioCtx) return;
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    sourceNode = audioCtx.createMediaElementSource(music);
-
-    // замедление
-    music.playbackRate = 0.78;
-    if ('preservesPitch' in music) music.preservesPitch = false;
-    if ('mozPreservesPitch' in music) music.mozPreservesPitch = false;
-    if ('webkitPreservesPitch' in music) music.webkitPreservesPitch = false;
-
-    // дисторшн
-    const distortion = audioCtx.createWaveShaper();
-    distortion.curve = makeDistortionCurve(18);
-    distortion.oversample = '4x';
-
-    // приглушение
-    const lowpass = audioCtx.createBiquadFilter();
-    lowpass.type = 'lowpass';
-    lowpass.frequency.value = 3200;
-    lowpass.Q.value = 0.7;
-
-    const highpass = audioCtx.createBiquadFilter();
-    highpass.type = 'highpass';
-    highpass.frequency.value = 60;
-
-    gainNode = audioCtx.createGain();
-    gainNode.gain.value = 0;
-
-    sourceNode.connect(distortion);
-    distortion.connect(lowpass);
-    lowpass.connect(highpass);
-    highpass.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-  }
-
-  function fadeIn() {
-    if (!gainNode || !audioCtx) return;
-    const now = audioCtx.currentTime;
-    gainNode.gain.cancelScheduledValues(now);
-    gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-    gainNode.gain.linearRampToValueAtTime(0.55, now + 4);
-  }
-
-  function fadeOut() {
-    if (!gainNode || !audioCtx) return;
-    const now = audioCtx.currentTime;
-    gainNode.gain.cancelScheduledValues(now);
-    gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-    gainNode.gain.linearRampToValueAtTime(0, now + 1.2);
-  }
-
-  async function toggleAudio() {
-    if (!audioCtx) initAudioChain();
-
-    // гарантированно запускаем AudioContext — иначе звук не дойдёт до выхода
-    if (audioCtx && audioCtx.state !== 'running') {
-      try { await audioCtx.resume(); }
-      catch (err) { console.error('Context resume failed:', err); }
-    }
-
+  hiddenBtn.addEventListener('click', () => {
     if (playing) {
-      fadeOut();
-      setTimeout(() => { music.pause(); }, 1200);
+      music.pause();
       playing = false;
-      return;
+    } else {
+      music.play().then(() => {
+        playing = true;
+      }).catch((err) => {
+        console.error('Play failed:', err);
+      });
     }
-
-    try {
-      await music.play();
-      playing = true;
-      fadeIn();
-      triggerFlash(0.1);
-    } catch (err) {
-      console.error('Play failed:', err);
-      triggerFlash(0.3);
-    }
-  }
-
-  hiddenBtn.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    triggerFlash(0.08);
-    await toggleAudio();
   });
-
-  function triggerFlash(intensity) {
-    glitchFlash.style.background = `rgba(255,255,255,${intensity})`;
-    glitchFlash.classList.remove('active');
-    void glitchFlash.offsetWidth;
-    glitchFlash.classList.add('active');
-  }
-
-  function randomGlitch() {
-    if (Math.random() < 0.5) {
-      triggerFlash(0.02 + Math.random() * 0.05);
-    }
-    const bgNoise = document.getElementById('bg-noise');
-    if (Math.random() < 0.3) {
-      bgNoise.style.opacity = (0.03 + Math.random() * 0.07).toFixed(3);
-      setTimeout(() => { bgNoise.style.opacity = '0.05'; }, 300 + Math.random() * 500);
-    }
-    setTimeout(randomGlitch, 2000 + Math.random() * 5000);
-  }
-  randomGlitch();
 </script>
 
 </body>
