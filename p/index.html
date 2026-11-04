@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>pr</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    cursor: default;
+    font-family: 'Courier New', monospace;
+  }
+
+  #bg-gif {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    filter: contrast(1.1) brightness(0.9) saturate(1.1);
+    pointer-events: none;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(255,255,255,0.02);
+    pointer-events: none;
+    animation: flicker 5s infinite;
+    z-index: 2;
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 0; }
+    48% { opacity: 0; }
+    50% { opacity: 1; }
+    52% { opacity: 0; }
+    88% { opacity: 0; }
+    89% { opacity: 1; }
+    90% { opacity: 0; }
+    91% { opacity: 1; }
+    92% { opacity: 0; }
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(255,255,255,0.025) 3px,
+      rgba(255,255,255,0.025) 4px
+    );
+    pointer-events: none;
+    z-index: 3;
+    animation: scanMove 8s linear infinite;
+  }
+
+  @keyframes scanMove {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(4px); }
+  }
+
+  #bg-noise {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.07;
+    mix-blend-mode: screen;
+    background: linear-gradient(90deg, #ff0044 0%, transparent 20%, transparent 80%, #00ffff 100%);
+    animation: bgShift 6s ease-in-out infinite;
+  }
+
+  @keyframes bgShift {
+    0%, 100% { transform: translateX(-10%); opacity: 0.05; }
+    50% { transform: translateX(10%); opacity: 0.1; }
+  }
+
+  #vignette {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 4;
+    background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.75) 100%);
+  }
+
+  #scan-bar {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(255,255,255,0.08);
+    pointer-events: none;
+    z-index: 5;
+    animation: scanBar 7s linear infinite;
+  }
+
+  @keyframes scanBar {
+    0% { top: -5%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 105%; opacity: 0; }
+  }
+
+  #glitch-flash {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 6;
+    background: #fff;
+    opacity: 0;
+  }
+
+  #glitch-flash.active { animation: flash 0.15s ease-out; }
+
+  @keyframes flash {
+    0% { opacity: 0.15; }
+    100% { opacity: 0; }
+  }
+
+  #audio-control {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    color: #333;
+    font-size: 11px;
+    cursor: pointer;
+    z-index: 100;
+    transition: color 0.3s;
+    user-select: none;
+    letter-spacing: 1px;
+  }
+
+  #audio-control:hover { color: #888; }
+  #audio-control.on { color: #ff6b9d; }
+
+  #hint {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #222;
+    font-size: 12px;
+    transition: color 0.5s;
+    z-index: 10;
+    letter-spacing: 2px;
+  }
+
+  #hint.show { color: #444; }
+
+  #center {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    text-align: center;
+    color: #fff;
+    font-size: 20px;
+    line-height: 2;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 2s ease;
+    text-shadow: 0 0 10px rgba(255,255,255,0.3);
+  }
+
+  #center.visible { opacity: 0.7; }
+  #center .dim { color: #888; font-size: 14px; letter-spacing: 4px; }
+</style>
+</head>
+<body>
+
+<img id="bg-gif" src="pr.gif" alt="">
+
+<div id="bg-noise"></div>
+<div id="vignette"></div>
+<div id="scan-bar"></div>
+<div id="glitch-flash"></div>
+
+<div id="center">
+  <div class="dim">...</div>
+</div>
+
+<div id="hint">нажми, чтобы включить звук</div>
+<div id="audio-control">♪ выкл</div>
+
+<audio id="bgMusic" loop crossorigin="anonymous">
+  <source src="pr.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+  const music = document.getElementById('bgMusic');
+  const audioControl = document.getElementById('audio-control');
+  const hint = document.getElementById('hint');
+  const glitchFlash = document.getElementById('glitch-flash');
+  const center = document.getElementById('center');
+
+  let audioCtx = null;
+  let gainNode = null;
+  let sourceNode = null;
+  let audioEnabled = false;
+  let audioUnlocked = false;
+
+  // ==== Web Audio: slowed + distorted ====
+  function makeDistortionCurve(amount) {
+    const k = amount;
+    const n = 44100;
+    const curve = new Float32Array(n);
+    const deg = Math.PI / 180;
+    for (let i = 0; i < n; i++) {
+      const x = (i * 2) / n - 1;
+      curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+    }
+    return curve;
+  }
+
+  function initAudioChain() {
+    if (audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    sourceNode = audioCtx.createMediaElementSource(music);
+
+    // Slowed down (0.75 = заметно медленнее, 0.85 = мягко)
+    music.playbackRate = 0.78;
+    // Ниже тон при замедлении — "ностальгический" эффект
+    if ('preservesPitch' in music) music.preservesPitch = false;
+    if ('mozPreservesPitch' in music) music.mozPreservesPitch = false;
+    if ('webkitPreservesPitch' in music) music.webkitPreservesPitch = false;
+
+    // Distortion
+    const distortion = audioCtx.createWaveShaper();
+    distortion.curve = makeDistortionCurve(18);
+    distortion.oversample = '4x';
+
+    // Lowpass — приглушённый "старый динамик"
+    const lowpass = audioCtx.createBiquadFilter();
+    lowpass.type = 'lowpass';
+    lowpass.frequency.value = 3200;
+    lowpass.Q.value = 0.7;
+
+    // Highpass — убрать лишний низ, чтобы не гудело
+    const highpass = audioCtx.createBiquadFilter();
+    highpass.type = 'highpass';
+    highpass.frequency.value = 60;
+
+    // Master gain
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = 0;
+
+    sourceNode.connect(distortion);
+    distortion.connect(lowpass);
+    lowpass.connect(highpass);
+    highpass.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+  }
+
+  function fadeIn() {
+    if (!gainNode || !audioCtx) return;
+    const now = audioCtx.currentTime;
+    gainNode.gain.cancelScheduledValues(now);
+    gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+    gainNode.gain.linearRampToValueAtTime(0.55, now + 4);
+  }
+
+  function enableAudio() {
+    if (audioEnabled) return;
+    audioEnabled = true;
+    audioControl.classList.add('on');
+    audioControl.textContent = '♪ вкл';
+    hint.classList.remove('show');
+    hint.textContent = '';
+    fadeIn();
+  }
+
+  function startPlayback() {
+    initAudioChain();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    const p = music.play();
+    if (p !== undefined) {
+      p.then(() => {
+        audioUnlocked = true;
+        enableAudio();
+        window.removeEventListener('mousemove', unlockAudio);
+        window.removeEventListener('click', unlockAudio);
+        window.removeEventListener('keydown', unlockAudio);
+        window.removeEventListener('touchstart', unlockAudio);
+        window.removeEventListener('scroll', unlockAudio);
+      }).catch(() => {
+        hint.classList.add('show');
+      });
+    }
+  }
+
+  function unlockAudio() {
+    if (audioUnlocked) return;
+    startPlayback();
+  }
+
+  window.addEventListener('mousemove', unlockAudio);
+  window.addEventListener('click', unlockAudio);
+  window.addEventListener('keydown', unlockAudio);
+  window.addEventListener('touchstart', unlockAudio);
+  window.addEventListener('scroll', unlockAudio);
+
+  // Попытка автоплея (обычно браузеры блокируют без жеста)
+  (function tryAutoPlay() {
+    initAudioChain();
+    const p = music.play();
+    if (p !== undefined) {
+      p.then(() => {
+        audioUnlocked = true;
+        enableAudio();
+      }).catch(() => {
+        hint.classList.add('show');
+      });
+    }
+  })();
+
+  audioControl.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!audioCtx) initAudioChain();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    if (audioEnabled) {
+      music.pause();
+      audioEnabled = false;
+      audioControl.classList.remove('on');
+      audioControl.textContent = '♪ выкл';
+    } else {
+      startPlayback();
+    }
+  });
+
+  function triggerFlash(intensity) {
+    glitchFlash.style.background = `rgba(255,255,255,${intensity})`;
+    glitchFlash.classList.remove('active');
+    void glitchFlash.offsetWidth;
+    glitchFlash.classList.add('active');
+  }
+
+  setTimeout(() => center.classList.add('visible'), 2000);
+
+  function randomGlitch() {
+    if (Math.random() < 0.5) triggerFlash(0.02 + Math.random() * 0.05);
+    const bgNoise = document.getElementById('bg-noise');
+    if (Math.random() < 0.3) {
+      bgNoise.style.opacity = (0.03 + Math.random() * 0.09).toFixed(3);
+      setTimeout(() => { bgNoise.style.opacity = '0.07'; }, 300 + Math.random() * 500);
+    }
+    setTimeout(randomGlitch, 2000 + Math.random() * 5000);
+  }
+  randomGlitch();
+</script>
+
+</body>
+</html>
