@@ -17,7 +17,6 @@
     align-items: center;
   }
 
-  /* --- pr.gif по центру, уменьшенный --- */
   #bg-gif {
     position: fixed;
     top: 50%; left: 50%;
@@ -32,7 +31,7 @@
     user-select: none;
   }
 
-  /* --- Скрытая кнопка в правом нижнем углу --- */
+  /* Скрытая кнопка в правом нижнем углу */
   #hidden-btn {
     position: fixed;
     bottom: 0; right: 0;
@@ -53,28 +52,89 @@
 
 <button id="hidden-btn" aria-label=""></button>
 
+<!-- Основной трек — играет на фоне -->
 <audio id="bgMusic" loop preload="auto">
+  <source src="pr.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Трек по кнопке -->
+<audio id="btnMusic" loop preload="auto">
   <source src="april2012.ogg" type="audio/ogg">
 </audio>
 
 <script>
-  const music = document.getElementById('bgMusic');
+  const bgMusic = document.getElementById('bgMusic');
+  const btnMusic = document.getElementById('btnMusic');
   const hiddenBtn = document.getElementById('hidden-btn');
 
-  let playing = false;
+  let bgStarted = false;
+  let oggActive = false;
 
-  hiddenBtn.addEventListener('click', () => {
-    if (playing) {
-      music.pause();
-      playing = false;
+  // ==== Основной трек ====
+  bgMusic.volume = 0.55;
+
+  function startBg() {
+    if (bgStarted) return;
+    bgMusic.play().then(() => {
+      bgStarted = true;
+    }).catch(() => {
+      // автоплей заблокирован — запустим на первом действии пользователя
+    });
+  }
+
+  startBg();
+
+  // если автоплей заблокирован — стартуем на первом клике/клавише/тапе
+  function firstGesture() {
+    startBg();
+    window.removeEventListener('click', firstGesture);
+    window.removeEventListener('keydown', firstGesture);
+    window.removeEventListener('touchstart', firstGesture);
+    window.removeEventListener('mousemove', firstGesture);
+  }
+  window.addEventListener('click', firstGesture);
+  window.addEventListener('keydown', firstGesture);
+  window.addEventListener('touchstart', firstGesture);
+  window.addEventListener('mousemove', firstGesture);
+
+  // ==== Кнопка: ogg поверх, mp3 на паузу ====
+  hiddenBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+
+    if (oggActive) {
+      // выключаем ogg, возвращаем фон
+      btnMusic.pause();
+      btnMusic.currentTime = 0;
+      oggActive = false;
+
+      if (bgStarted) {
+        bgMusic.play().catch(() => {});
+      }
     } else {
-      music.play().then(() => {
-        playing = true;
+      // включаем ogg, глушим фон
+      bgMusic.pause();
+
+      btnMusic.currentTime = 0;
+      btnMusic.volume = 0.7;
+      btnMusic.play().then(() => {
+        oggActive = true;
       }).catch((err) => {
-        console.error('Play failed:', err);
+        console.error('ogg play failed:', err);
       });
     }
   });
+
+  // страховка: если основной трек не стартовал до клика —
+  // после выключения ogg он тоже поднимется
+  btnMusic.addEventListener('pause', () => {
+    if (!oggActive && bgStarted) {
+      bgMusic.play().catch(() => {});
+    }
+  });
+
+  // логи для проверки
+  bgMusic.addEventListener('error', () => console.error('[bg.mp3] error', bgMusic.error));
+  btnMusic.addEventListener('error', () => console.error('[april2012.ogg] error', btnMusic.error));
 </script>
 
 </body>
